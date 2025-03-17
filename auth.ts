@@ -1,4 +1,4 @@
-    import NextAuth from "next-auth"
+    import NextAuth, { DefaultSession } from "next-auth"
     import { UserRole } from "@prisma/client"
     import { PrismaAdapter } from "@auth/prisma-adapter"
 
@@ -6,7 +6,18 @@
     import authConfig from "@/auth.config"
     import { getUserById } from "@/data/user"
     import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-confirmation"
+import { getAccountByUserId } from "./data/account"
 
+    declare module "next-auth" {
+        interface Session {
+            user: {
+                id: string;
+                role: UserRole;
+                isTwoFactorEnabled: boolean;
+            } & DefaultSession["user"];
+        }
+    }
+    
     export const {
         auth,
         signIn,
@@ -68,7 +79,7 @@
 
                 if (session.user) {
                     session.user.name = token.name;
-                    session.user.email = token.email;
+                    session.user.email = token.email ?? "";
                 }
 
                 return session;
@@ -79,6 +90,10 @@
                 const existingUser = await getUserById(token.sub);
 
                 if (!existingUser) return token;
+
+                const existingAccount = await getAccountByUserId(
+                    existingUser.id
+                );
                 
                 token.name = existingUser.name;
                 token.email = existingUser.email;

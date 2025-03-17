@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 import { LoginSchema } from "@/schemas";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ export const LoginForm = () => {
   const [error, setError] = useState<string | undefined>("");
   const [sucess, setSuccess] = useState<string | undefined>("");
   const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -43,23 +45,22 @@ export const LoginForm = () => {
 
     startTransition(() => {
       login(values)
-      .then((data) => {
-        if (data?.error) {
-          form.reset();
-          setError(data.error);
-        }
+        .then((data) => {
+          if (data?.error) {
+            form.reset();
+            setError(data.error);
+          }
 
-        if (data?.success) {
-          form.reset();
-          setSuccess(data.success);
-        }
+          if (data?.success) {
+            form.reset();
+            setSuccess(data.success);
+          }
 
-        if (data?.twoFactor) {
-          setShowTwoFactor(true);
-        }
-
-      })
-      .catch(() => setError("Algo está errado"));
+          if (data?.twoFactor) {
+            setShowTwoFactor(true);
+          }
+        })
+        .catch(() => setError("Algo está errado"));
     });
   };
 
@@ -71,29 +72,22 @@ export const LoginForm = () => {
       showSocial
     >
       <Form {...form}>
-        <form 
-        onSubmit={form.handleSubmit(onSubmit)} 
-        className="space-y-6"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             {showTwoFactor && (
               <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Código de autenticação de dois fatores</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      disabled={isPending}
-                      placeholder="123456"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Código de autenticação de dois fatores</FormLabel>
+                    <FormControl>
+                      <Input {...field} disabled={isPending} placeholder="123456" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
             {!showTwoFactor && (
               <>
@@ -122,12 +116,28 @@ export const LoginForm = () => {
                     <FormItem>
                       <FormLabel>Senha</FormLabel>
                       <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="*********"
-                          type="password"
-                        />
+                        <div className="relative">
+                          <Input
+                            {...field}
+                            disabled={isPending}
+                            placeholder="*********"
+                            type={showPassword ? "text" : "password"}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 text-gray-500 hover:text-gray-700"
+                            onClick={() => setShowPassword(!showPassword)}
+                            disabled={isPending}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
                       </FormControl>
                       <Button
                         size="sm"
@@ -135,16 +145,14 @@ export const LoginForm = () => {
                         asChild
                         className="px-0 font-normal"
                       >
-                        <Link href="/auth/reset">
-                          Esqueceu sua senha?
-                        </Link>
+                        <Link href="/auth/reset">Esqueceu sua senha?</Link>
                       </Button>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-            </>
-          )}
+              </>
+            )}
           </div>
           <FormError message={error} />
           <FormSuccess message={sucess} />
