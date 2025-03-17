@@ -1,5 +1,5 @@
 {
-  "name": "auth-tutorial",
+  "name": "cenid",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -36,7 +36,8 @@
     "tailwind-merge": "^2.5.1",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "shadcn/ui": "^1.0.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
