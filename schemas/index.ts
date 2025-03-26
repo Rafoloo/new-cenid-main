@@ -1,34 +1,27 @@
-import { UserRole } from "@prisma/client";
 import * as z from "zod";
 
 export const SettingsSchema = z.object({
-    name: z.optional(z.string()),
-    isTwoFactorAuthEnabled: z.optional(z.boolean()),
-    role: z.enum([UserRole.ADMIN, UserRole.USER]),
-    email: z.optional(z.string().email()),
-    password: z.optional(z.string().min(6)),
-    newPassword: z.optional(z.string().min(6)),        
-})
-    .refine((data) => {
-        if (data.password && !data.newPassword) {
-            return false;
-        }
-
-        return true;
-    }, {
-        message: "Nova senha é obrigatória",
-        path: ["newPassword"],
-    })
-    .refine((data) => {
-        if (data.newPassword && !data.password) {
-            return false;
-        }
-
-        return true;
-    }, {
-        message: "Senha atual é obrigatória",
-        path: ["password"],
-    })
+  name: z.string().optional(),
+  email: z.string().email("E-mail inválido").optional(),
+  password: z.string().optional(),
+  newPassword: z.string().optional(),
+  role: z.enum(["ADMIN", "USER"]),
+  isTwoFactorAuthEnabled: z.boolean().optional(),
+}).refine(
+  (data) => {
+    if (data.password && !data.newPassword) {
+      return false;
+    }
+    if (data.newPassword && !data.password) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Nova senha requer senha atual e vice-versa",
+    path: ["newPassword"],
+  }
+);
 
 export const NewPasswordSchema = z.object({
     password: z.string().min(6,{

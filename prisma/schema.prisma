@@ -13,16 +13,15 @@ enum UserRole {
 }
 
 model User {
-  id                      String                 @id @default(uuid()) @map("_id")
-  name                    String?
-  email                   String?                @unique
-  emailVerified           DateTime?
-  image                   String?
-  password                String?
-  role                    UserRole               @default(USER)
-  accounts                Account[]
-  isTwoFactorEnabled      Boolean                @default(false)
-  twoFactorConfirmation   TwoFactorConfirmation?
+  id                    String    @id @default(uuid()) @map("_id")
+  name                  String?
+  email                 String?   @unique
+  emailVerified         DateTime?
+  password              String?
+  role                  UserRole  @default(USER)
+  isTwoFactorEnabled    Boolean   @default(false)
+  accounts              Account[]
+  twoFactorConfirmation TwoFactorConfirmation?
   twoFactorConfirmationId String?
 }
 
@@ -78,4 +77,54 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
+}
+
+model Patient {
+  id                             Int      @id @default(autoincrement())
+  nome                           String?  @map("nome")
+  cpf                            String?  @unique @map("cpf")
+  cartaoSus                      String?  @map("cartao_sus")
+  rg                             String?  @map("rg")
+  telefone                       String?  @map("telefone")
+  dataNascimento                 DateTime? @map("data_nascimento")
+  email                          String   @map("email")
+  ocupacao                       String?  @map("ocupacao")
+  sexo                           String?  @map("sexo")
+  endereco                       String?  @map("endereco")
+  municipio                      String?  @map("municipio")
+  numero                         String?  @map("numero")
+  tipoAtendimento                String?  @map("tipo_atendimento")
+  diagnostico                    String?  @map("diagnostico")
+  outrasFormasDm                 String?  @map("outras_formas_dm")
+  dataDiagnostico                DateTime? @map("data_diagnostico")
+  gestante                       String?  @map("gestante")
+  semanasGestacao                Int?     @map("semanas_gestacao")
+  amamentando                    String?  @map("amamentando")
+  tempoPosParto                  String?  @map("tempo_pos_parto")
+  deficiencia                    String?  @map("deficiencia")
+  tipoDeficiencia                String?  @map("tipo_deficiencia")
+  historicoDm1                   String?  @map("historico_dm1")
+  parentescoDm1                  String?  @map("parentesco_dm1")
+  historicoDm2                   String?  @map("historico_dm2")
+  parentescoDm2                  String?  @map("parentesco_dm2")
+  historicoOutrasFormasDm        String?  @map("historico_outras_formas_dm")
+  parentescoOutrasFormasDm       String?  @map("parentesco_outras_formas_dm")
+  metodoInsulina                 String?  @map("metodo_insulina")
+  marcaModeloBomba               String?  @map("marca_modelo_bomba")
+  metodoMonitoramentoGlicemia    String?  @map("metodo_monitoramento_glicemia")
+  marcaModeloGlicometroSensor    String?  @map("marca_modelo_glicometro_sensor")
+  usoAppGlicemia                 String?  @map("uso_app_glicemia")
+  outrosApps                     String?  @map("outros_apps")
+  nomeResponsavel                String?  @map("nome_responsavel")
+  cpfResponsavel                 String?  @map("cpf_responsavel")
+  rgResponsavel                  String?  @map("rg_responsavel")
+  parentescoResponsavel          String?  @map("parentesco_responsavel")
+  telefoneResponsavel            String?  @map("telefone_responsavel")
+  ocupacaoResponsavel            String?  @map("ocupacao_responsavel")
+  dataNascimentoResponsavel      DateTime? @map("data_nascimento_responsavel")
+  anexar                         Bytes?   @map("anexar")
+  auxilio                        String?  @map("auxilio")
+  outrosAuxilios                 String?  @map("outros_auxilios")
+  possuiCelularComAcessoInternet String?  @map("possui_celular_com_acesso_a_internet")
+  dateCadastro                   DateTime? @map("datecadastro")
 }
