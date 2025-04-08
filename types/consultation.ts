@@ -1,0 +1,36 @@
+import { Key, ReactNode } from "react";
+
+export type Consultation = {
+  email: ReactNode;
+  id: Key | null | undefined;
+  status: any;
+  date: string | number | Date;
+  patientName: ReactNode;
+  formType: string;
+  patientId: number;
+  nomePaciente: string;
+  cpf: string;
+  dataConsulta: string;
+  horaConsulta: string;
+  duracaoConsulta: number;
+  tipoConsulta: string;
+  especialidade: string;
+  profissional: string;
+  motivoConsulta: string;
+  sintomasRelatados?: string;
+  statusConsulta: 'Agendada' | 'Confirmada' | 'EmAndamento' | 'Concluida' | 'Cancelada';
+  prioridade: 'Baixa' | 'Media' | 'Alta' | 'Urgente';
+  ultimaGlicemia?: string;
+  ultimaHemoglobina?: string;
+  medicamentos?: string;
+  alergias?: string;
+  precisaAcompanhante: boolean;
+  nomeAcompanhante?: string;
+  telefoneAcompanhante?: string;
+  salaAtendimento?: string;
+  consultaRemota: boolean;
+  linkConsultaRemota?: string;
+  enviarLembreteEmail: boolean;
+  enviarLembreteSMS: boolean;
+  observacoes?: string;
+};

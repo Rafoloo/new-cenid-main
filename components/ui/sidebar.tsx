@@ -1,4 +1,3 @@
-// ./components/ui/sidebar.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserButton } from "@/components/auth/user-button";
 import {
+  UserPlus,  
   LayoutDashboard,
-  Settings,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
@@ -89,22 +88,22 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
             )}
           >
             <Link href="/cadastro" className="flex items-center space-x-3">
-              <LayoutDashboard className="h-5 w-5" />
+              <UserPlus className="h-5 w-5" />
               {!isCollapsed && <span className="text-base font-medium">Cadastro</span>}
             </Link>
           </Button>
           <Button
             asChild
-            variant={pathname === "/settings" ? "secondary" : "ghost"}
+            variant={pathname === "/dashboard" ? "secondary" : "ghost"}
             className={cn(
               "w-full justify-start text-teal-100 hover:bg-teal-700/50 hover:text-white",
               isCollapsed && "justify-center px-0",
-              pathname === "/settings" && "bg-teal-700 text-white"
+              pathname === "/dashboard" && "bg-teal-700 text-white"
             )}
           >
-            <Link href="/settings" className="flex items-center space-x-3">
-              <Settings className="h-5 w-5" />
-              {!isCollapsed && <span className="text-base font-medium">Configurações</span>}
+            <Link href="/dashboard" className="flex items-center space-x-3">
+              <LayoutDashboard className="h-5 w-5" />
+              {!isCollapsed && <span className="text-base font-medium">Dashboard</span>}
             </Link>
           </Button>
         </nav>

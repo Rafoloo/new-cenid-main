@@ -19,10 +19,8 @@ export const Navbar = () => {
       const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Rolando para baixo
         setIsVisible(false);
       } else {
-        // Rolando para cima
         setIsVisible(true);
       }
 
@@ -53,9 +51,9 @@ export const Navbar = () => {
         </Button>
         <Button
           asChild
-          variant={pathname === "/settings" ? "default" : "outline"}
+          variant={pathname === "/dashboard" ? "default" : "outline"}
         >
-          <Link href="/settings">Configurações</Link>
+          <Link href="/dashboard">Dashboard</Link>
         </Button>
       </div>
       <UserButton />
