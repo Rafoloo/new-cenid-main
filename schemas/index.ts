@@ -45,15 +45,20 @@ export const LoginSchema = z.object({
     code: z.optional(z.string()),
 });
 
-export const RegisterSchema = z.object({
+export const RegisterSchema = z
+  .object({
     email: z.string().email({
-        message: "Email é obrigatório"
+      message: "Email é obrigatório",
     }),
     password: z.string().min(6, {
-        message: "Mínimo de 6 caracteres"
+      message: "Mínimo de 6 caracteres",
     }),
     name: z.string().min(1, {
-        message: "Nome é obrigatório",
-    })
-
-});
+      message: "Nome é obrigatório",
+    }),
+    confirmPassword: z.string().min(6, "Confirme sua senha"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
