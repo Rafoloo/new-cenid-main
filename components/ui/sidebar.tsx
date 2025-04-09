@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { UserButton } from "@/components/auth/user-button";
 import {
-  UserPlus,  
+  UserPlus,
   LayoutDashboard,
   ChevronRight,
   ChevronLeft,
@@ -39,10 +39,7 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
     };
 
     window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   const handleCollapse = () => {
@@ -56,59 +53,67 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
   return (
     <div
       className={cn(
-        "bg-gradient-to-b from-teal-900 to-teal-800 text-white h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
+        "bg-gradient-to-b from-blue-800 to-blue-950 text-white font-sans h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-72",
         isVisible ? "translate-x-0" : "-translate-x-full",
         "fixed top-0 left-0 z-50",
         className
       )}
     >
-      <div className="p-4 flex items-center justify-between border-b border-teal-700/50">
+      {/* Topo */}
+      <div className="p-4 flex items-center justify-between border-b border-white/10">
         {!isCollapsed && (
-          <h2 className="text-2xl font-bold tracking-tight text-teal-100">Sistema</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-white">Sistema</h2>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={handleCollapse}
-          className="text-teal-200 hover:bg-teal-700/50 hover:text-white rounded-full"
+          className="text-white hover:bg-white/10 rounded-full transition-all"
         >
           {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </Button>
       </div>
+
+      {/* Itens */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-2">
+          {/* Dashboard primeiro */}
           <Button
             asChild
-            variant={pathname === "/cadastro" ? "secondary" : "ghost"}
+            variant="ghost"
             className={cn(
-              "w-full justify-start text-teal-100 hover:bg-teal-700/50 hover:text-white",
+              "w-full justify-start text-white hover:bg-white/10 hover:text-white transition-colors",
               isCollapsed && "justify-center px-0",
-              pathname === "/cadastro" && "bg-teal-700 text-white"
-            )}
-          >
-            <Link href="/cadastro" className="flex items-center space-x-3">
-              <UserPlus className="h-5 w-5" />
-              {!isCollapsed && <span className="text-base font-medium">Cadastro</span>}
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant={pathname === "/dashboard" ? "secondary" : "ghost"}
-            className={cn(
-              "w-full justify-start text-teal-100 hover:bg-teal-700/50 hover:text-white",
-              isCollapsed && "justify-center px-0",
-              pathname === "/dashboard" && "bg-teal-700 text-white"
+              pathname === "/dashboard" && "bg-white/10 font-semibold"
             )}
           >
             <Link href="/dashboard" className="flex items-center space-x-3">
               <LayoutDashboard className="h-5 w-5" />
-              {!isCollapsed && <span className="text-base font-medium">Dashboard</span>}
+              {!isCollapsed && <span className="text-base">Dashboard</span>}
+            </Link>
+          </Button>
+
+          {/* Cadastro */}
+          <Button
+            asChild
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-white/10 hover:text-white transition-colors",
+              isCollapsed && "justify-center px-0",
+              pathname === "/cadastro" && "bg-white/10 font-semibold"
+            )}
+          >
+            <Link href="/cadastro" className="flex items-center space-x-3">
+              <UserPlus className="h-5 w-5" />
+              {!isCollapsed && <span className="text-base">Cadastro</span>}
             </Link>
           </Button>
         </nav>
       </ScrollArea>
-      <div className="p-4 border-t border-teal-700/50 bg-teal-900/50">
+
+      {/* Rodapé */}
+      <div className="p-4 border-t border-white/10 bg-white/5">
         <div className={cn("flex justify-center", !isCollapsed && "justify-start")}>
           <UserButton />
         </div>

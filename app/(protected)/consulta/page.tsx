@@ -274,22 +274,22 @@ const ConsultaForm = () => {
 
   return (
     <Card className="max-w-3xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
-      <CardHeader className="bg-teal-50 p-4">
+      <CardHeader className="bg-blue-50 p-4">
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
             size="icon"
             onClick={() => router.back()}
-            className="hover:bg-teal-100"
+            className="hover:bg-blue-100"
           >
-            <ArrowLeft className="h-5 w-5 text-teal-800" />
+            <ArrowLeft className="h-5 w-5 text-blue-800" />
           </Button>
-          <CardTitle className="text-xl font-semibold text-teal-800">Cadastro de Consulta</CardTitle>
+          <CardTitle className="text-xl font-semibold text-blue-800">Cadastro de Consulta</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="p-6">
         <div className="mb-6">
-          <h2 className="text-lg font-medium text-teal-700 mb-4">
+          <h2 className="text-lg font-medium text-blue-700 mb-4">
             Selecione a Especialidade*
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -298,7 +298,7 @@ const ConsultaForm = () => {
               variant={selectedSpecialty === 'Medicina' ? 'default' : 'outline'}
               className={cn(
                 "w-full p-4 h-auto flex flex-col gap-2",
-                selectedSpecialty === 'Medicina' ? 'bg-teal-600 text-white' : 'border-teal-200'
+                selectedSpecialty === 'Medicina' ? 'bg-blue-600 text-white' : 'border-blue-200'
               )}
               onClick={() => handleSpecialtyClick('Medicina')}
             >
@@ -311,7 +311,7 @@ const ConsultaForm = () => {
               variant={selectedSpecialty === 'Psicologia' ? 'default' : 'outline'}
               className={cn(
                 "w-full p-4 h-auto flex flex-col gap-2",
-                selectedSpecialty === 'Psicologia' ? 'bg-teal-600 text-white' : 'border-teal-200'
+                selectedSpecialty === 'Psicologia' ? 'bg-blue-600 text-white' : 'border-blue-200'
               )}
               onClick={() => handleSpecialtyClick('Psicologia')}
             >
@@ -324,7 +324,7 @@ const ConsultaForm = () => {
               variant={selectedSpecialty === 'Educação Física' ? 'default' : 'outline'}
               className={cn(
                 "w-full p-4 h-auto flex flex-col gap-2",
-                selectedSpecialty === 'Educação Física' ? 'bg-teal-600 text-white' : 'border-teal-200'
+                selectedSpecialty === 'Educação Física' ? 'bg-blue-600 text-white' : 'border-blue-200'
               )}
               onClick={() => handleSpecialtyClick('Educação Física')}
             >
@@ -337,7 +337,7 @@ const ConsultaForm = () => {
               variant={selectedSpecialty === 'Nutrição' ? 'default' : 'outline'}
               className={cn(
                 "w-full p-4 h-auto flex flex-col gap-2",
-                selectedSpecialty === 'Nutrição' ? 'bg-teal-600 text-white' : 'border-teal-200'
+                selectedSpecialty === 'Nutrição' ? 'bg-blue-600 text-white' : 'border-blue-200'
               )}
               onClick={() => handleSpecialtyClick('Nutrição')}
             >
@@ -354,8 +354,8 @@ const ConsultaForm = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Dados do Paciente</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Dados do Paciente</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="cpf" render={({ field }) => (
                   <FormItem>
@@ -395,8 +395,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Dados da Consulta</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Dados da Consulta</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="dataConsulta" render={({ field }) => (
                   <FormItem>
@@ -502,8 +502,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Motivo e Observações</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Motivo e Observações</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 gap-4">
                 <FormField control={form.control} name="motivoConsulta" render={({ field }) => (
                   <FormItem>
@@ -535,8 +535,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Status e Prioridade</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Status e Prioridade</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="statusConsulta" render={({ field }) => (
                   <FormItem>
@@ -582,8 +582,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Controle de Diabetes</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Controle de Diabetes</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="ultimaGlicemia" render={({ field }) => (
                   <FormItem>
@@ -607,8 +607,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Informações Complementares</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Informações Complementares</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 gap-4">
                 <FormField control={form.control} name="medicamentos" render={({ field }) => (
                   <FormItem>
@@ -640,8 +640,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Acompanhamento</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Acompanhamento</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="precisaAcompanhante" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
@@ -681,8 +681,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Logística</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Logística</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="salaAtendimento" render={({ field }) => (
                   <FormItem>
@@ -718,8 +718,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Notificações</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Notificações</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField control={form.control} name="enviarLembreteEmail" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
@@ -741,8 +741,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-teal-700">Observações Adicionais</h2>
-              <Separator className="bg-teal-200" />
+              <h2 className="text-lg font-medium text-blue-700">Observações Adicionais</h2>
+              <Separator className="bg-blue-200" />
               <div className="grid grid-cols-1 gap-4">
                 <FormField control={form.control} name="observacoes" render={({ field }) => (
                   <FormItem>
@@ -763,7 +763,7 @@ const ConsultaForm = () => {
             <div className="flex justify-end pt-4">
               <Button 
                 type="submit" 
-                className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 py-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Agendando..." : "Agendar Consulta"}

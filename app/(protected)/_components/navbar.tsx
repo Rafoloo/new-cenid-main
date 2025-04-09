@@ -38,25 +38,29 @@ export const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 w-full bg-secondary flex justify-between items-center p-4 shadow-sm transition-transform duration-300 ${
+      className={`fixed top-0 z-50 w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md transition-transform duration-300 ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className="flex gap-x-2">
-        <Button
-          asChild
-          variant={pathname === "/cadastro" ? "default" : "outline"}
-        >
-          <Link href="/cadastro">Cadastro</Link>
-        </Button>
-        <Button
-          asChild
-          variant={pathname === "/dashboard" ? "default" : "outline"}
-        >
-          <Link href="/dashboard">Dashboard</Link>
-        </Button>
+      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div className="flex gap-x-3">
+          <Button
+            asChild
+            variant={pathname === "/dashboard" ? "secondary" : "ghost"}
+            className="text-white hover:bg-blue-700 hover:text-white"
+          >
+            <Link href="/dashboard">Dashboard</Link>
+          </Button>
+          <Button
+            asChild
+            variant={pathname === "/cadastro" ? "secondary" : "ghost"}
+            className="text-white hover:bg-blue-700 hover:text-white"
+          >
+            <Link href="/cadastro">Cadastro</Link>
+          </Button>
+        </div>
+        <UserButton />
       </div>
-      <UserButton />
     </nav>
   );
 };

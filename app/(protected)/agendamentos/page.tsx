@@ -234,7 +234,7 @@ export default function ConsultasPage() {
         <h1 className="text-2xl font-bold">Gerenciamento de Consultas</h1>
         <Button 
           onClick={() => router.push("/consulta")}
-          className="bg-teal-600 hover:bg-teal-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           Nova Consulta
         </Button>

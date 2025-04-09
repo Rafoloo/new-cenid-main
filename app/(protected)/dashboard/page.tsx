@@ -52,7 +52,8 @@ import {
   Settings,
   PlusCircle,
   Bell,
-  Clock
+  Clock,
+  ArrowRight
 } from "lucide-react";
 
  
@@ -162,9 +163,9 @@ const Dashboard = () => {
 
 
   const diagnosticData: DiagnosticData[] = [
-    { label: "DM1", value: 2, color: "#0ea5e9" },
-    { label: "DM2", value: 2, color: "#10b981" },
-    { label: "LADA", value: 1, color: "#f59e0b" },
+    { label: "DM1", value: 2, color: "#2563eb" }, // azul mais escuro
+    { label: "DM2", value: 2, color: "#60a5fa" }, // azul médio
+    { label: "LADA", value: 1, color: "#93c5fd" }, // azul claro
   ];
 
   const filteredPatients = patients.filter((patient) => {
@@ -204,7 +205,7 @@ const Dashboard = () => {
         </div>
         <Button 
           onClick={navigateToForm}
-          className="bg-teal-600 hover:bg-teal-700 text-white"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
         >
           <UserPlus className="mr-2 h-4 w-4" />
           Novo Paciente
@@ -224,56 +225,56 @@ const Dashboard = () => {
           value={diagnosticData[0].value}
           description="Pacientes com DM1"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          className="border-l-4 border-blue-500"
+          className="border-l-4 border-blue-700"
         />
         <StatCard
           title="DM2"
           value={diagnosticData[1].value}
           description="Pacientes com DM2"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          className="border-l-4 border-green-500"
+          className="border-l-4 border-blue-500"
         />
         <StatCard
           title="LADA"
           value={diagnosticData[2].value}
           description="Pacientes com LADA"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          className="border-l-4 border-amber-500"
+          className="border-l-4 border-blue-300"
         />
       </div>
 
       {/* Cards de Ações Rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:bg-gray-50">
+        <Card className="cursor-pointer hover:bg-blue-50">
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <FilePlus className="h-8 w-8 text-teal-600 mb-3" />
+            <FilePlus className="h-8 w-8 text-blue-600 mb-3" />
             <h3 className="font-medium">Novo Relatório</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Gere relatórios personalizados
             </p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-gray-50" onClick={() => router.push('/agendamentos')}>
+        <Card className="cursor-pointer hover:bg-blue-50" onClick={() => router.push('/agendamentos')}>
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <CalendarRange className="h-8 w-8 text-teal-600 mb-3" />
+            <CalendarRange className="h-8 w-8 text-blue-600 mb-3" />
             <h3 className="font-medium">Agendamentos</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Consultas agendadas
             </p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-gray-50">
+        <Card className="cursor-pointer hover:bg-blue-50">
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <FileSearch className="h-8 w-8 text-teal-600 mb-3" />
+            <FileSearch className="h-8 w-8 text-blue-600 mb-3" />
             <h3 className="font-medium">Monitoramento</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Acompanhe medições recentes
             </p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-gray-50">
+        <Card className="cursor-pointer hover:bg-blue-50">
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <PieChart className="h-8 w-8 text-teal-600 mb-3" />
+            <PieChart className="h-8 w-8 text-blue-600 mb-3" />
             <h3 className="font-medium">Estatísticas</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Análise de dados dos pacientes
@@ -336,7 +337,7 @@ const Dashboard = () => {
                   currentItems.map((patient) => (
                     <TableRow 
                       key={patient.id}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-blue-50"
                       onClick={() => navigateToPatientDetails(patient.id)}
                     >
                       <TableCell className="font-medium">{patient.nome}</TableCell>
@@ -348,8 +349,8 @@ const Dashboard = () => {
                         <span 
                           className={`px-2 py-1 rounded-full text-xs font-medium
                           ${patient.diagnostico === "DM1" ? "bg-blue-100 text-blue-800" : 
-                            patient.diagnostico === "DM2" ? "bg-green-100 text-green-800" : 
-                            "bg-amber-100 text-amber-800"}`}
+                            patient.diagnostico === "DM2" ? "bg-blue-100 text-blue-600" : 
+                            "bg-blue-100 text-blue-500"}`}
                         >
                           {patient.diagnostico}
                         </span>
