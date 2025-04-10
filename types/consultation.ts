@@ -1,15 +1,8 @@
-import { Key, ReactNode } from "react";
-
-export type Consultation = {
-  email: ReactNode;
-  id: Key | null | undefined;
-  status: any;
-  date: string | number | Date;
-  patientName: ReactNode;
-  formType: string;
-  patientId: number;
-  nomePaciente: string;
+export interface Consultation {
+  patientId: any;
+  id?: string;
   cpf: string;
+  nomePaciente: string;
   dataConsulta: string;
   horaConsulta: string;
   duracaoConsulta: number;
@@ -18,7 +11,7 @@ export type Consultation = {
   profissional: string;
   motivoConsulta: string;
   sintomasRelatados?: string;
-  statusConsulta: 'Agendada' | 'Confirmada' | 'EmAndamento' | 'Concluida' | 'Cancelada';
+  statusConsulta: 'Agendada' | 'Confirmada' | 'EmAndamento' | 'Concluida' | 'Cancelada' | 'Remarcada';
   prioridade: 'Baixa' | 'Media' | 'Alta' | 'Urgente';
   ultimaGlicemia?: string;
   ultimaHemoglobina?: string;
@@ -33,4 +26,7 @@ export type Consultation = {
   enviarLembreteEmail: boolean;
   enviarLembreteSMS: boolean;
   observacoes?: string;
-};
+  email: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
