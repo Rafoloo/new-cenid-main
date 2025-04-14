@@ -67,7 +67,7 @@ export default function LoginForm() {
   return (
     <div className="flex h-screen w-full bg-white">
       {/* Left sidebar */}
-      <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-blue-600 to-blue-800 flex-col relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-teal-600 to-teal-800 flex-col relative overflow-hidden">
         <div className="absolute inset-0 bg-blue-900/20 backdrop-blur-sm z-0"></div>
 
         <div className="p-12 z-10 flex-1 flex items-center justify-center">
@@ -208,7 +208,7 @@ export default function LoginForm() {
                                 size="sm"
                                 variant="link"
                                 asChild
-                                className="px-0 font-normal text-blue-600 hover:text-blue-800"
+                                className="px-0 font-normal text-teal-600 hover:text-teal-800"
                               >
                                 <Link href="/auth/reset">Esqueceu sua senha?</Link>
                               </Button>
@@ -227,7 +227,7 @@ export default function LoginForm() {
                 <Button
                   disabled={isPending}
                   type="submit"
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all"
+                  className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all"
                 >
                   {isPending ? "Processando..." : showTwoFactor ? "Verificar" : "Entrar"}
                   <ArrowRight className="h-4 w-4" />
@@ -241,7 +241,7 @@ export default function LoginForm() {
                   Ainda não tem uma conta?{" "}
                   <Link
                     href="/auth/register"
-                    className="font-medium text-blue-600 hover:text-blue-800"
+                    className="font-medium text-teal-600 hover:text-teal-800"
                   >
                     Criar conta
                   </Link>

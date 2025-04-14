@@ -23,11 +23,11 @@ import {
 
 
 const formTypes = [
+  "Todos",
   "Medicina",
+  "Psicologia",
   "Educação Física",
   "Nutrição",
-  "Fisioterapia",
-  "Todos"
 ] as const;
 
 const ConsultationModal = ({ 
@@ -44,7 +44,7 @@ const ConsultationModal = ({
   const getStatusColor = (status: string) => {
     const colors = {
       'Agendada': 'bg-yellow-500 text-white',
-      'Confirmada': 'bg-blue-500 text-white',
+      'Confirmada': 'bg-teal-500 text-white',
       'EmAndamento': 'bg-indigo-500 text-white',
       'Concluida': 'bg-green-500 text-white',
       'Cancelada': 'bg-red-500 text-white',
@@ -185,7 +185,7 @@ export default function ConsultasPage() {
     const getStatusColor = (status: string) => {
       const colors = {
         Agendada: "bg-yellow-100 text-yellow-800",
-        EmAndamento: "bg-blue-100 text-blue-800",
+        EmAndamento: "bg-teal-100 text-teal-800",
         Concluida: "bg-green-100 text-green-800",
         Cancelada: "bg-red-100 text-red-800"
       };
@@ -233,8 +233,8 @@ export default function ConsultasPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gerenciamento de Consultas</h1>
         <Button 
-          onClick={() => router.push("/consulta")}
-          className="bg-blue-600 hover:bg-blue-700 text-white"
+          onClick={() => router.push("/cadastrar-consulta")}
+          className="bg-teal-600 hover:bg-teal-700 text-white"
         >
           Nova Consulta
         </Button>

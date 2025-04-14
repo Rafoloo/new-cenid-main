@@ -206,8 +206,8 @@ const PatientForm = () => {
   };
 
   return (
-    <Card className="max-w-3xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
-      <CardHeader className="bg-teal-50 p-4">
+    <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
+      <CardHeader className="bg-teal-100 p-4">
         <CardTitle className="text-xl font-semibold text-teal-800">Cadastro de Paciente</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
