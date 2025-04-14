@@ -1,8 +1,14 @@
-export interface Consultation {
-  patientId: any;
-  id?: string;
+
+export interface Patient {
+  id: number;
+  nome: string;
   cpf: string;
-  nomePaciente: string;
+  email: string;
+}
+
+export interface Consultation {
+  id: string;
+  patientId: number;
   dataConsulta: string;
   horaConsulta: string;
   duracaoConsulta: number;
@@ -11,8 +17,8 @@ export interface Consultation {
   profissional: string;
   motivoConsulta: string;
   sintomasRelatados?: string;
-  statusConsulta: 'Agendada' | 'Confirmada' | 'EmAndamento' | 'Concluida' | 'Cancelada' | 'Remarcada';
-  prioridade: 'Baixa' | 'Media' | 'Alta' | 'Urgente';
+  statusConsulta: string;
+  prioridade: string;
   ultimaGlicemia?: string;
   ultimaHemoglobina?: string;
   medicamentos?: string;
@@ -26,7 +32,22 @@ export interface Consultation {
   enviarLembreteEmail: boolean;
   enviarLembreteSMS: boolean;
   observacoes?: string;
-  email: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  
+  nomePaciente?: string;
+  cpf?: string;
+  email?: string;
+  patient?: Patient;
 }
+
+export type ConsultationStatus = 
+  'Agendada' | 'Confirmada' | 'EmAndamento' | 'Concluida' | 'Cancelada' | 'Remarcada';
+
+export type ConsultationType = 
+  'PrimeiraConsulta' | 'RetornoRegular' | 'Emergencia' | 'Nutricional' | 'Psicologica' | 'ControleGlicemico';
+
+export type ConsultationPriority = 
+  'Baixa' | 'Media' | 'Alta' | 'Urgente';
+
+export type Specialty = 'Medicina' | 'Psicologia' | 'Educação Física' | 'Nutrição';

@@ -48,8 +48,8 @@ import { useRouter } from "next/navigation";
 type Specialty = 'Medicina' | 'Psicologia' | 'Educação Física' | 'Nutrição';
 
 interface Patient {
-  id: number; // Ajustado para number
-  nome: string; // Ajustado para 'nome'
+  id: number;
+  nome: string;
   cpf: string;
   email: string;
 }
@@ -88,15 +88,15 @@ const CustomHeader = (props: { displayMonth: any }) => {
   );
 };
 
-// Função para validar CPF
+
 const validateCPF = (cpf: string) => {
   cpf = cpf.replace(/\D/g, '');
   if (cpf.length !== 11) return false;
 
-  // Elimina CPFs inválidos conhecidos
+
   if (/^(\d)\1+$/.test(cpf)) return false;
 
-  // Validação do primeiro dígito verificador
+
   let sum = 0;
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cpf.charAt(i)) * (10 - i);
@@ -123,6 +123,7 @@ const ConsultaSchema = z.object({
     (date) => {
       const selectedDate = new Date(date);
       const today = new Date();
+      today.setHours(0, 0, 0, 0); 
       return selectedDate >= today;
     },
     "Data deve ser igual ou posterior a hoje"
@@ -257,13 +258,17 @@ const ConsultaForm = () => {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
+        setIsLoadingPatients(true);
         const response = await fetch('/api/patients');
-        if (!response.ok) throw new Error('Failed to fetch patients');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to fetch patients');
+        }
         const data = await response.json();
         setPatients(data);
       } catch (error) {
         console.error('Error fetching patients:', error);
-        toast.error("Erro ao carregar pacientes");
+        toast.error("Erro ao carregar pacientes. Por favor, recarregue a página.");
       } finally {
         setIsLoadingPatients(false);
       }
@@ -282,56 +287,82 @@ const ConsultaForm = () => {
     }
   };
 
-  const onSubmit = async (data: ConsultaFormValues) => {
-    try {
-      setIsSubmitting(true);
+  // No arquivo ConsultaForm.jsx ou ConsultaForm.tsx
+// Substitua a função onSubmit por esta versão corrigida:
 
-      if (!selectedSpecialty) {
-        toast.error("Selecione uma especialidade");
-        return;
-      }
+const onSubmit = async (data: ConsultaFormValues) => {
+  try {
+    setIsSubmitting(true);
 
-      const response = await fetch('/api/consultations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...data,
-          patientId: parseInt(data.patientId), // Convertendo para número
-          especialidade: selectedSpecialty,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create consultation');
-      }
-
-      toast.success("Consulta agendada com sucesso!");
-      
-      // Redirecionamento direto para a página de agendamentos
-      router.push('/'); // Primeiro vai para a página inicial para garantir limpeza de estado
-      
-      // Depois redireciona para a página de agendamentos com um pequeno atraso
-      setTimeout(() => {
-        // Com base no seu segundo arquivo, parece que a rota correta seria "/"
-        // mas adapte conforme a rota real da sua aplicação
-        window.location.href = '/'; // Presumindo que a página principal contém a lista de agendamentos
-      }, 100);
-      
-      form.reset();
-      setSelectedSpecialty(null);
-    } catch (error) {
-      console.error('Error creating consultation:', error);
-      toast.error("Erro ao agendar consulta. Tente novamente.");
-    } finally {
-      setIsSubmitting(false);
+    if (!selectedSpecialty) {
+      toast.error("Selecione uma especialidade");
+      return;
     }
-  };
+
+    // Validação adicional para garantir que o ID do paciente existe
+    if (!patients.some(p => p.id === parseInt(data.patientId))) {
+      toast.error("Paciente selecionado não é válido");
+      return;
+    }
+
+    // Verificar se a data e hora estão preenchidas
+    if (!data.dataConsulta || !data.horaConsulta) {
+      toast.error("Data e hora da consulta são obrigatórias");
+      return;
+    }
+
+    // Preparar dados para envio
+    const consultaData = {
+      ...data,
+      patientId: parseInt(data.patientId),
+      especialidade: selectedSpecialty,
+    };
+
+    console.log("Enviando dados:", consultaData);
+
+    const response = await fetch('/api/consultations', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(consultaData),
+    });
+
+    // Lidar com a resposta diretamente como JSON
+    const responseData = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(responseData.message || 'Falha ao criar consulta');
+    }
+
+    console.log("Resposta da API:", responseData);
+
+    // Sucesso no agendamento
+    toast.success("Consulta agendada com sucesso!");
+    
+    // Limpar formulário
+    form.reset();
+    setSelectedSpecialty(null);
+    
+    // Redirecionar após sucesso
+    router.push('/');
+    
+  } catch (error) {
+    console.error('Error creating consultation:', error);
+    toast.error(`Erro ao agendar consulta: ${error instanceof Error ? error.message : 'Tente novamente'}`);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const onPatientSubmit = async (data: PatientFormValues) => {
     try {
+      const existingPatient = patients.find(p => p.cpf === data.cpf);
+      if (existingPatient) {
+        toast.error("CPF já cadastrado no sistema");
+        return;
+      }
+
       const response = await fetch('/api/patients', {
         method: 'POST',
         headers: {
@@ -346,41 +377,42 @@ const ConsultaForm = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create patient');
+        throw new Error(errorData.message || 'Falha ao criar paciente');
       }
 
       const newPatient = await response.json();
       setPatients([...patients, newPatient]);
-      form.setValue('patientId', String(newPatient.id)); // Convertendo para string
+      form.setValue('patientId', String(newPatient.id));
       setIsNewPatient(false);
+      patientForm.reset();
       toast.success("Paciente criado com sucesso!");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating patient:', error);
-      toast.error("Erro ao criar paciente. Tente novamente.");
+      toast.error(`Erro ao criar paciente: ${error?.message || 'Tente novamente'}`);
     }
   };
 
   return (
     <Card className="max-w-3xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
-      <CardHeader className="bg-blue-50 p-4">
+      <CardHeader className="bg-teal-50 p-4">
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
-            className="hover:bg-blue-100"
+            className="hover:bg-teal-100"
           >
-            <ArrowLeft className="h-5 w-5 text-blue-800" />
+            <ArrowLeft className="h-5 w-5 text-teal-800" />
           </Button>
-          <CardTitle className="text-xl font-semibold text-blue-800">Cadastro de Consulta</CardTitle>
+          <CardTitle className="text-xl font-semibold text-teal-800">Cadastro de Consulta</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Dados do Paciente</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Dados do Paciente</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -406,7 +438,7 @@ const ConsultaForm = () => {
                         type="button"
                         variant="link"
                         onClick={() => setIsNewPatient(true)}
-                        className="mt-2 text-blue-600"
+                        className="mt-2 text-teal-600"
                       >
                         Cadastrar novo paciente
                       </Button>
@@ -418,7 +450,7 @@ const ConsultaForm = () => {
               {isNewPatient && (
                 <Form {...patientForm}>
                   <form onSubmit={patientForm.handleSubmit(onPatientSubmit)} className="space-y-4 border p-4 rounded-md">
-                    <h3 className="text-md font-medium text-blue-700">Cadastrar Novo Paciente</h3>
+                    <h3 className="text-md font-medium text-teal-700">Cadastrar Novo Paciente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={patientForm.control}
@@ -477,7 +509,7 @@ const ConsultaForm = () => {
                       >
                         Cancelar
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                      <Button type="submit" className="bg-teal-600 hover:bg-teal-700 text-white">
                         Salvar Paciente
                       </Button>
                     </div>
@@ -487,7 +519,7 @@ const ConsultaForm = () => {
             </section>
 
             <div className="mb-6">
-              <h2 className="text-lg font-medium text-blue-700 mb-4">
+              <h2 className="text-lg font-medium text-teal-700 mb-4">
                 Selecione a Especialidade*
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -496,7 +528,7 @@ const ConsultaForm = () => {
                   variant={selectedSpecialty === 'Medicina' ? 'default' : 'outline'}
                   className={cn(
                     "w-full p-4 h-auto flex flex-col gap-2",
-                    selectedSpecialty === 'Medicina' ? 'bg-blue-600 text-white' : 'border-blue-200'
+                    selectedSpecialty === 'Medicina' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
                   onClick={() => handleSpecialtyClick('Medicina')}
                 >
@@ -508,7 +540,7 @@ const ConsultaForm = () => {
                   variant={selectedSpecialty === 'Psicologia' ? 'default' : 'outline'}
                   className={cn(
                     "w-full p-4 h-auto flex flex-col gap-2",
-                    selectedSpecialty === 'Psicologia' ? 'bg-blue-600 text-white' : 'border-blue-200'
+                    selectedSpecialty === 'Psicologia' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
                   onClick={() => handleSpecialtyClick('Psicologia')}
                 >
@@ -520,7 +552,7 @@ const ConsultaForm = () => {
                   variant={selectedSpecialty === 'Educação Física' ? 'default' : 'outline'}
                   className={cn(
                     "w-full p-4 h-auto flex flex-col gap-2",
-                    selectedSpecialty === 'Educação Física' ? 'bg-blue-600 text-white' : 'border-blue-200'
+                    selectedSpecialty === 'Educação Física' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
                   onClick={() => handleSpecialtyClick('Educação Física')}
                 >
@@ -532,7 +564,7 @@ const ConsultaForm = () => {
                   variant={selectedSpecialty === 'Nutrição' ? 'default' : 'outline'}
                   className={cn(
                     "w-full p-4 h-auto flex flex-col gap-2",
-                    selectedSpecialty === 'Nutrição' ? 'bg-blue-600 text-white' : 'border-blue-200'
+                    selectedSpecialty === 'Nutrição' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
                   onClick={() => handleSpecialtyClick('Nutrição')}
                 >
@@ -548,8 +580,8 @@ const ConsultaForm = () => {
             </div>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Dados da Consulta</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Dados da Consulta</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -659,19 +691,6 @@ const ConsultaForm = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="especialidade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Especialidade</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite a especialidade" className="border-gray-300" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="profissional"
                   render={({ field }) => (
                     <FormItem>
@@ -687,8 +706,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Motivo e Observações</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Motivo e Observações</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
@@ -728,8 +747,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Status e Prioridade</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Status e Prioridade</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -783,8 +802,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Controle de Diabetes</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Controle de Diabetes</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -816,8 +835,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Informações Complementares</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Informações Complementares</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
@@ -857,8 +876,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Acompanhamento</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Acompanhamento</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -917,8 +936,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Logística</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Logística</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -971,8 +990,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Notificações</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Notificações</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -1002,8 +1021,8 @@ const ConsultaForm = () => {
             </section>
 
             <section className="space-y-4">
-              <h2 className="text-lg font-medium text-blue-700">Observações Adicionais</h2>
-              <Separator className="bg-blue-200" />
+              <h2 className="text-lg font-medium text-teal-700">Observações Adicionais</h2>
+              <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
@@ -1028,7 +1047,7 @@ const ConsultaForm = () => {
             <div className="flex justify-end pt-4">
               <Button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2"
+                className="bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 py-2"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? "Agendando..." : "Agendar Consulta"}

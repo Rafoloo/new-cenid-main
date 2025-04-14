@@ -5,14 +5,14 @@ export async function createConsultation(data: Consultation) {
   try {
     const patient = await db.patient.upsert({
       where: {
-        cpf: data.cpf.replace(/\D/g, '')
+        cpf: (data.cpf || '').replace(/\D/g, '')
       },
       update: {
         nome: data.nomePaciente,
       },
       create: {
         nome: data.nomePaciente,
-        cpf: data.cpf.replace(/\D/g, ''),
+        cpf: (data.cpf ?? '').replace(/\D/g, ''),
         email: '', 
       }
     });

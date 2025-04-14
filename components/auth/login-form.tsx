@@ -67,27 +67,27 @@ export default function LoginForm() {
   return (
     <div className="flex h-screen w-full bg-white">
       {/* Left sidebar */}
-      <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-blue-600 to-blue-800 flex-col relative overflow-hidden">
-        <div className="absolute inset-0 bg-blue-900/20 backdrop-blur-sm z-0"></div>
+      <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-teal-600 to-teal-800 flex-col relative overflow-hidden">
+        <div className="absolute inset-0 bg-teal-900/20 backdrop-blur-sm z-0"></div>
 
         <div className="p-12 z-10 flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white">CENID</h1>
-            <p className="text-xl text-blue-100 mt-4">Centro Interdisciplinar em Diabetes</p>
+            <p className="text-xl text-teal-100 mt-4">Centro Interdisciplinar em Diabetes</p>
           </div>
         </div>
 
         <div className="space-y-8 p-12 z-10">
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
             <h3 className="text-white text-lg font-semibold mb-3">Acesso completo ao sistema</h3>
-            <p className="text-blue-100 text-sm">
+            <p className="text-teal-100 text-sm">
               Gerencie prontuários, consultas e acompanhamentos em uma única plataforma integrada.
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
             <h3 className="text-white text-lg font-semibold mb-3">Dados seguros</h3>
-            <p className="text-blue-100 text-sm">
+            <p className="text-teal-100 text-sm">
               Todas as informações são criptografadas e protegidas.
             </p>
           </div>
@@ -98,7 +98,7 @@ export default function LoginForm() {
       <div className="w-full lg:w-2/3 xl:w-3/5 flex flex-col">
         <header className="p-6 md:p-8 flex justify-between items-center">
           <div className="lg:hidden flex flex-col items-center text-center">
-            <h1 className="text-2xl font-bold text-blue-800">CENID</h1>
+            <h1 className="text-2xl font-bold text-teal-800">CENID</h1>
             <p className="text-sm text-gray-500">Centro Interdisciplinar em Diabetes</p>
           </div>
         </header>
@@ -134,7 +134,7 @@ export default function LoginForm() {
                                 {...field}
                                 disabled={isPending}
                                 placeholder="123456"
-                                className="h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                                className="h-12 rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500 pl-10"
                               />
                               <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                             </div>
@@ -160,7 +160,7 @@ export default function LoginForm() {
                                   disabled={isPending}
                                   placeholder="mail@example.com"
                                   type="email"
-                                  className="h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                                  className="h-12 rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500 pl-10"
                                 />
                                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                               </div>
@@ -184,14 +184,14 @@ export default function LoginForm() {
                                   disabled={isPending}
                                   placeholder="Sua senha"
                                   type={showPassword ? "text" : "password"}
-                                  className="h-12 rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                                  className="h-12 rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500 pl-10"
                                 />
                                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                 <Button
                                   type="button"
                                   variant="ghost"
                                   size="sm"
-                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-teal-600"
                                   onClick={() => setShowPassword(!showPassword)}
                                   disabled={isPending}
                                 >
@@ -208,7 +208,7 @@ export default function LoginForm() {
                                 size="sm"
                                 variant="link"
                                 asChild
-                                className="px-0 font-normal text-blue-600 hover:text-blue-800"
+                                className="px-0 font-normal text-teal-600 hover:text-teal-800"
                               >
                                 <Link href="/auth/reset">Esqueceu sua senha?</Link>
                               </Button>
@@ -227,7 +227,7 @@ export default function LoginForm() {
                 <Button
                   disabled={isPending}
                   type="submit"
-                  className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all"
+                  className="w-full h-12 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all"
                 >
                   {isPending ? "Processando..." : showTwoFactor ? "Verificar" : "Entrar"}
                   <ArrowRight className="h-4 w-4" />
@@ -241,7 +241,7 @@ export default function LoginForm() {
                   Ainda não tem uma conta?{" "}
                   <Link
                     href="/auth/register"
-                    className="font-medium text-blue-600 hover:text-blue-800"
+                    className="font-medium text-teal-600 hover:text-teal-800"
                   >
                     Criar conta
                   </Link>

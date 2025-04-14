@@ -53,7 +53,7 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
   return (
     <div
       className={cn(
-        "bg-gradient-to-b from-blue-800 to-blue-950 text-white font-sans h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
+        "bg-gradient-to-b from-teal-800 to-teal-950 text-white font-sans h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-72",
         isVisible ? "translate-x-0" : "-translate-x-full",
         "fixed top-0 left-0 z-50",

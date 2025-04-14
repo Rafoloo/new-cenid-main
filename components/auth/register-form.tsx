@@ -79,27 +79,27 @@ export default function RegisterForm() {
   return (
     <div className="flex min-h-screen w-full flex-col lg:flex-row bg-white">
       {/* Left sidebar */}
-      <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-blue-600 to-blue-800 flex-col relative overflow-hidden">
-        <div className="absolute inset-0 bg-blue-900/20 backdrop-blur-sm z-0"></div>
+      <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-teal-600 to-teal-800 flex-col relative overflow-hidden">
+        <div className="absolute inset-0 bg-teal-900/20 backdrop-blur-sm z-0"></div>
 
         <div className="p-12 z-10 flex-1 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-white">CENID</h1>
-            <p className="text-xl text-blue-100 mt-4">Centro Interdisciplinar em Diabetes</p>
+            <p className="text-xl text-teal-100 mt-4">Centro Interdisciplinar em Diabetes</p>
           </div>
         </div>
 
         <div className="space-y-8 p-12 z-10">
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
             <h3 className="text-white text-lg font-semibold mb-3">Acesso completo ao sistema</h3>
-            <p className="text-blue-100 text-sm">
+            <p className="text-teal-100 text-sm">
               Gerencie prontuários, consultas e acompanhamentos em uma única plataforma integrada.
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6">
             <h3 className="text-white text-lg font-semibold mb-3">Dados seguros</h3>
-            <p className="text-blue-100 text-sm">
+            <p className="text-teal-100 text-sm">
               Todas as informações são criptografadas e protegidas.
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function RegisterForm() {
       <div className="w-full lg:w-2/3 xl:w-3/5 flex flex-col min-h-screen">
         <header className="p-4 sm:p-6 md:p-8 flex justify-between items-center">
           <div className="lg:hidden w-full flex flex-col items-center text-center">
-            <h1 className="text-xl sm:text-2xl font-bold text-blue-800">CENID</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-teal-800">CENID</h1>
             <p className="text-xs sm:text-sm text-gray-500">Centro Interdisciplinar em Diabetes</p>
           </div>
         </header>
@@ -135,7 +135,7 @@ export default function RegisterForm() {
                           {...field}
                           placeholder="Seu nome"
                           disabled={isPending}
-                          className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                          className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500"
                         />
                       </FormControl>
                       <FormMessage className="text-xs sm:text-sm" />
@@ -156,7 +156,7 @@ export default function RegisterForm() {
                             disabled={isPending}
                             placeholder="mail@example.com"
                             type="email"
-                            className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                            className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500 pl-10"
                           />
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         </div>
@@ -179,14 +179,14 @@ export default function RegisterForm() {
                             disabled={isPending}
                             placeholder="Crie uma senha"
                             type={showPassword ? "text" : "password"}
-                            className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                            className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500 pl-10"
                           />
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-teal-600"
                             onClick={() => setShowPassword(!showPassword)}
                             disabled={isPending}
                           >
@@ -214,14 +214,14 @@ export default function RegisterForm() {
                             disabled={isPending}
                             placeholder="Confirme sua senha"
                             type={showPassword ? "text" : "password"}
-                            className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10"
+                            className="h-10 sm:h-12 text-sm sm:text-base rounded-lg border-gray-300 focus:border-teal-500 focus:ring-teal-500 pl-10"
                           />
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600"
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-teal-600"
                             onClick={() => setShowPassword(!showPassword)}
                             disabled={isPending}
                           >
@@ -240,7 +240,7 @@ export default function RegisterForm() {
                 <Button
                   disabled={isPending}
                   type="submit"
-                  className="w-full h-10 sm:h-12 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all"
+                  className="w-full h-10 sm:h-12 text-sm sm:text-base bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-all"
                 >
                   {isPending ? "Criando conta..." : "Cadastrar"}
                   <ArrowRight className="h-4 w-4" />
@@ -251,7 +251,7 @@ export default function RegisterForm() {
             <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
               <p className="text-xs sm:text-sm text-gray-600 text-center">
                 Já tem uma conta?{" "}
-                <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-800">
+                <Link href="/auth/login" className="font-medium text-teal-600 hover:text-teal-800">
                   Entrar
                 </Link>
               </p>
