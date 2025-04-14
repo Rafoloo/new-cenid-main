@@ -81,6 +81,15 @@ interface StatCardProps {
   className?: string;
 }
 
+const formatDateSafely = (dateString: string | null | undefined) => {
+  if (!dateString) return "N/A";
+  try {
+    return format(new Date(dateString), "dd/MM/yyyy");
+  } catch (error) {
+    console.error(`Error formatting date: ${dateString}`, error);
+    return "Data inválida";
+  }
+};
 
 const StatCard = ({ title, value, description, icon, className }: StatCardProps) => (
   <Card className={`${className}`}>
@@ -110,7 +119,7 @@ const Dashboard = () => {
   
   const [patients, setPatients] = useState<Patient[]>([]);
 
-  // Função para buscar pacientes da API
+
   const fetchPatients = async () => {
     try {
       setLoading(true);
@@ -131,12 +140,11 @@ const Dashboard = () => {
     }
   };
 
-  // Buscar pacientes ao carregar o componente
+
   useEffect(() => {
     fetchPatients();
   }, []);
 
-  // Calcular contagens para os cards de estatísticas
   const getDiagnosticCounts = () => {
     const counts = {
       DM1: 0,
@@ -364,7 +372,7 @@ const Dashboard = () => {
                       <TableCell className="font-medium">{patient.nome}</TableCell>
                       <TableCell>{patient.cpf}</TableCell>
                       <TableCell>
-                        {format(new Date(patient.dataNascimento), "dd/MM/yyyy")}
+                        {formatDateSafely(patient.dataNascimento)}
                       </TableCell>
                       <TableCell>
                         <span 
@@ -381,7 +389,7 @@ const Dashboard = () => {
                         <div className="text-sm text-muted-foreground">{patient.email}</div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(patient.dataCadastro), "dd/MM/yyyy")}
+                        {formatDateSafely(patient.dataCadastro)}
                       </TableCell>
                     </TableRow>
                   ))

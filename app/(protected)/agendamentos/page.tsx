@@ -43,7 +43,6 @@ const formTypes = [
   "Psicologia",
   "Educação Física",
   "Nutrição",
-  "Todos"
 ] as const;
 
 const ConsultationModal = ({ 
@@ -196,10 +195,8 @@ export default function ConsultasPage() {
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
       
-      // Processar dados para adicionar informações do paciente
       const processedData = data.map((consultation: any) => ({
         ...consultation,
-        // Adicionar campos derivados da relação paciente para facilitar acesso
         nomePaciente: consultation.patient?.nome,
         cpf: consultation.patient?.cpf,
         email: consultation.patient?.email,
@@ -247,7 +244,6 @@ export default function ConsultasPage() {
   };
 
   const handleEditConsultation = (consultation: Consultation) => {
-    // Navegar para a página de edição com o ID da consulta
     router.push(`/consulta/editar/${consultation.id}`);
   };
 
@@ -337,7 +333,7 @@ export default function ConsultasPage() {
           </Button>
           <Button 
             onClick={() => router.push("/consulta")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="bg-teal-600 hover:bg-teal-700 text-white"
           >
             Nova Consulta
           </Button>
