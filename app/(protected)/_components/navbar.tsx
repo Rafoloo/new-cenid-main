@@ -38,7 +38,7 @@ export const Navbar = () => {
 
   return (
     <nav
-      className={`fixed top-0 z-50 w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white shadow-md transition-transform duration-300 ${
+      className={`fixed top-0 z-50 w-full bg-gradient-to-r from-teal-600 to-teal-800 text-white shadow-md transition-transform duration-300 ${
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
@@ -47,14 +47,14 @@ export const Navbar = () => {
           <Button
             asChild
             variant={pathname === "/dashboard" ? "secondary" : "ghost"}
-            className="text-white hover:bg-blue-700 hover:text-white"
+            className="text-white hover:bg-teal-700 hover:text-white"
           >
             <Link href="/dashboard">Dashboard</Link>
           </Button>
           <Button
             asChild
             variant={pathname === "/cadastro" ? "secondary" : "ghost"}
-            className="text-white hover:bg-blue-700 hover:text-white"
+            className="text-white hover:bg-teal-700 hover:text-white"
           >
             <Link href="/cadastro">Cadastro</Link>
           </Button>
