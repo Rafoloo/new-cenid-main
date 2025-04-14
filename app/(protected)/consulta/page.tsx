@@ -1,132 +1,134 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Activity, Brain, Dumbbell, Apple, Stethoscope } from "lucide-react"
-import FormularioMedicina from "@/components/auth/medicina-form"
-import FormularioPsicologia from "@/components/auth/psicologia-form"
-import FormularioEducacaoFisica from "@/components/auth/fisica-form"
-import FormularioNutricao from "@/components/auth/nutricao-form"
-import FormularioEnfermagem from "@/components/auth/medicina-form"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import InputMask from "react-input-mask";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { CalendarIcon, ChevronLeft, ChevronRight, Clock, Stethoscope, Brain, Dumbbell, Apple, ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { CaptionProps, useNavigation } from "react-day-picker";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
-  const [especialidadeSelecionada, setEspecialidadeSelecionada] = useState<string | null>(null)
+// ... (manter todas as validações Zod e tipos existentes)
 
-  const selecionarEspecialidade = (especialidade: string) => {
-    setEspecialidadeSelecionada(especialidade === especialidadeSelecionada ? null : especialidade)
-  }
+const ConsultaForm = () => {
+  // ... (manter toda a lógica existente de estado e formulários)
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto p-4">
-        <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
-          <CardHeader className="bg-teal-100 p-4">
-            <CardTitle className="text-2xl font-bold text-teal-800">Cadastro de Consulta</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-teal-700 mb-4">Selecione a Especialidade*</h2>
-
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <button
-                  onClick={() => selecionarEspecialidade("medicina")}
-                  className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                    especialidadeSelecionada === "medicina"
-                      ? "border-2 border-teal-500 bg-teal-50"
-                      : "border-teal-200 hover:border-teal-500 hover:border-2"
-                  }`}
-                >
-                  <Activity className="h-8 w-8 mb-2 text-teal-600" />
-                  <span className="text-teal-800">Medicina</span>
-                </button>
-                <button
-                  onClick={() => selecionarEspecialidade("psicologia")}
-                  className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                    especialidadeSelecionada === "psicologia"
-                      ? "border-2 border-teal-500 bg-teal-50"
-                      : "border-teal-200 hover:border-teal-500 hover:border-2"
-                  }`}
-                >
-                  <Brain className="h-8 w-8 mb-2 text-teal-600" />
-                  <span className="text-teal-800">Psicologia</span>
-                </button>
-                <button
-                  onClick={() => selecionarEspecialidade("educacao-fisica")}
-                  className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                    especialidadeSelecionada === "educacao-fisica"
-                      ? "border-2 border-teal-500 bg-teal-50"
-                      : "border-teal-200 hover:border-teal-500 hover:border-2"
-                  }`}
-                >
-                  <Dumbbell className="h-8 w-8 mb-2 text-teal-600" />
-                  <span className="text-teal-800">Educação Física</span>
-                </button>
-                <button
-                  onClick={() => selecionarEspecialidade("nutricao")}
-                  className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                    especialidadeSelecionada === "nutricao"
-                      ? "border-2 border-teal-500 bg-teal-50"
-                      : "border-teal-200 hover:border-teal-500 hover:border-2"
-                  }`}
-                >
-                  <Apple className="h-8 w-8 mb-2 text-teal-600" />
-                  <span className="text-teal-800">Nutrição</span>
-                </button>
-                <button
-                  onClick={() => selecionarEspecialidade("enfermagem")}
-                  className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                    especialidadeSelecionada === "enfermagem"
-                      ? "border-2 border-teal-500 bg-teal-50"
-                      : "border-teal-200 hover:border-teal-500 hover:border-2"
-                  }`}
-                >
-                  <Stethoscope className="h-8 w-8 mb-2 text-teal-600" />
-                  <span className="text-teal-800">Enfermagem</span>
-                </button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {especialidadeSelecionada && (
-          <Card className="shadow-lg rounded-lg border border-gray-200">
-            <CardHeader className="bg-teal-50">
-              <CardTitle className="text-2xl font-bold text-teal-800">
-                Formulário de Consulta -{" "}
-                {especialidadeSelecionada === "medicina"
-                  ? "Medicina"
-                  : especialidadeSelecionada === "psicologia"
-                    ? "Psicologia"
-                    : especialidadeSelecionada === "educacao-fisica"
-                      ? "Educação Física"
-                      : especialidadeSelecionada === "nutricao"
-                       ? "Nutrição"
-                        : "Enfermagem"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              {especialidadeSelecionada === "medicina" && <FormularioMedicina />}
-              {especialidadeSelecionada === "psicologia" && <FormularioPsicologia />}
-              {especialidadeSelecionada === "educacao-fisica" && <FormularioEducacaoFisica />}
-              {especialidadeSelecionada === "nutricao" && <FormularioNutricao />}
-              {especialidadeSelecionada === "enfermagem" && <FormularioEnfermagem />}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* {especialidadeSelecionada && (
-          <div className="mt-4 flex justify-center">
+      <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
+        <CardHeader className="bg-teal-100 p-4">
+          <div className="flex items-center space-x-4">
             <Button
-              variant="outline"
-              className="border-teal-300 text-teal-700 hover:bg-teal-50"
-              onClick={() => setEspecialidadeSelecionada(null)}
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="hover:bg-teal-200"
             >
-              Voltar para seleção de especialidade
+              <ArrowLeft className="h-5 w-5 text-teal-800" />
             </Button>
+            <CardTitle className="text-xl font-semibold text-teal-800">Cadastro de Consulta</CardTitle>
           </div>
-        )} */}
-      </div>
+        </CardHeader>
+        
+        <CardContent className="p-6">
+          {/* Seção de Especialidade - Estilo do primeiro arquivo */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-teal-700 mb-4">Selecione a Especialidade*</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <button
+                onClick={() => handleSpecialtyClick('Medicina')}
+                className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
+                  selectedSpecialty === 'Medicina'
+                    ? "border-2 border-teal-500 bg-teal-50"
+                    : "border-teal-200 hover:border-teal-500 hover:border-2"
+                }`}
+              >
+                <Stethoscope className="h-8 w-8 mb-2 text-teal-600" />
+                <span className="text-teal-800">Medicina</span>
+              </button>
+              <button
+                onClick={() => handleSpecialtyClick('Psicologia')}
+                className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
+                  selectedSpecialty === 'Psicologia'
+                    ? "border-2 border-teal-500 bg-teal-50"
+                    : "border-teal-200 hover:border-teal-500 hover:border-2"
+                }`}
+              >
+                <Brain className="h-8 w-8 mb-2 text-teal-600" />
+                <span className="text-teal-800">Psicologia</span>
+              </button>
+              <button
+                onClick={() => handleSpecialtyClick('Educação Física')}
+                className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
+                  selectedSpecialty === 'Educação Física'
+                    ? "border-2 border-teal-500 bg-teal-50"
+                    : "border-teal-200 hover:border-teal-500 hover:border-2"
+                }`}
+              >
+                <Dumbbell className="h-8 w-8 mb-2 text-teal-600" />
+                <span className="text-teal-800">Educação Física</span>
+              </button>
+              <button
+                onClick={() => handleSpecialtyClick('Nutrição')}
+                className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
+                  selectedSpecialty === 'Nutrição'
+                    ? "border-2 border-teal-500 bg-teal-50"
+                    : "border-teal-200 hover:border-teal-500 hover:border-2"
+                }`}
+              >
+                <Apple className="h-8 w-8 mb-2 text-teal-600" />
+                <span className="text-teal-800">Nutrição</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Restante do formulário (manter toda a implementação existente) */}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* ... (manter todas as seções do formulário existente) */}
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
     </div>
-  )
-}
+  );
+};
+
+export default ConsultaForm;
