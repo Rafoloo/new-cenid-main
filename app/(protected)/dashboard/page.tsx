@@ -226,56 +226,56 @@ const Dashboard = () => {
           value={diagnosticData[0].value}
           description="Pacientes com DM1"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          className="border-l-4 border-blue-700"
+          className="border-l-4 border-teal-700"
         />
         <StatCard
           title="DM2"
           value={diagnosticData[1].value}
           description="Pacientes com DM2"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          className="border-l-4 border-blue-500"
+          className="border-l-4 border-teal-500"
         />
         <StatCard
           title="LADA"
           value={diagnosticData[2].value}
           description="Pacientes com LADA"
           icon={<PieChart className="h-4 w-4 text-muted-foreground" />}
-          className="border-l-4 border-blue-300"
+          className="border-l-4 border-teal-300"
         />
       </div>
 
       {/* Cards de Ações Rápidas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="cursor-pointer hover:bg-blue-50">
+        <Card className="cursor-pointer hover:bg-teal-50">
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <FilePlus className="h-8 w-8 text-blue-600 mb-3" />
+            <FilePlus className="h-8 w-8 text-teal-600 mb-3" />
             <h3 className="font-medium">Novo Relatório</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Gere relatórios personalizados
             </p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-blue-50" onClick={() => router.push('/agendamentos')}>
+        <Card className="cursor-pointer hover:bg-teal-50" onClick={() => router.push('/agendamentos')}>
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <CalendarRange className="h-8 w-8 text-blue-600 mb-3" />
+            <CalendarRange className="h-8 w-8 text-teal-600 mb-3" />
             <h3 className="font-medium">Agendamentos</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Consultas agendadas
             </p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-blue-50">
+        <Card className="cursor-pointer hover:bg-teal-50">
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <FileSearch className="h-8 w-8 text-blue-600 mb-3" />
+            <FileSearch className="h-8 w-8 text-teal-600 mb-3" />
             <h3 className="font-medium">Monitoramento</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Acompanhe medições recentes
             </p>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-blue-50">
+        <Card className="cursor-pointer hover:bg-teal-50">
           <CardContent className="p-6 flex flex-col items-center text-center">
-            <PieChart className="h-8 w-8 text-blue-600 mb-3" />
+            <PieChart className="h-8 w-8 text-teal-600 mb-3" />
             <h3 className="font-medium">Estatísticas</h3>
             <p className="text-xs text-muted-foreground mt-1">
               Análise de dados dos pacientes
@@ -341,63 +341,60 @@ const Dashboard = () => {
           )}
 
           {/* Tabela */}
-          {!loading && !error && (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>CPF</TableHead>
-                    <TableHead>Data de Nascimento</TableHead>
-                    <TableHead>Diagnóstico</TableHead>
-                    <TableHead>Contato</TableHead>
-                    <TableHead>Cadastro</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {currentItems.length > 0 ? (
-                    currentItems.map((patient) => (
-                      <TableRow 
-                        key={patient.id}
-                        className="cursor-pointer hover:bg-blue-50"
-                        onClick={() => navigateToPatientDetails(patient.id)}
-                      >
-                        <TableCell className="font-medium">{patient.nome}</TableCell>
-                        <TableCell>{patient.cpf}</TableCell>
-                        <TableCell>
-                          {patient.dataNascimento ? formatDate(patient.dataNascimento) : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <span 
-                            className={`px-2 py-1 rounded-full text-xs font-medium
-                            ${patient.diagnostico === "DM1" ? "bg-blue-100 text-blue-800" : 
-                              patient.diagnostico === "DM2" ? "bg-blue-100 text-blue-600" : 
-                              patient.diagnostico === "LADA" ? "bg-blue-100 text-blue-500" :
-                              "bg-gray-100 text-gray-800"}`}
-                          >
-                            {patient.diagnostico || "Não informado"}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div>{patient.telefone || "-"}</div>
-                          <div className="text-sm text-muted-foreground">{patient.email || "-"}</div>
-                        </TableCell>
-                        <TableCell>
-                          {patient.dataCadastro ? formatDate(patient.dataCadastro) : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
-                        Nenhum paciente encontrado com os filtros atuais.
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>CPF</TableHead>
+                  <TableHead>Data de Nascimento</TableHead>
+                  <TableHead>Diagnóstico</TableHead>
+                  <TableHead>Contato</TableHead>
+                  <TableHead>Cadastro</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {currentItems.length > 0 ? (
+                  currentItems.map((patient) => (
+                    <TableRow 
+                      key={patient.id}
+                      className="cursor-pointer hover:bg-teal-50"
+                      onClick={() => navigateToPatientDetails(patient.id)}
+                    >
+                      <TableCell className="font-medium">{patient.nome}</TableCell>
+                      <TableCell>{patient.cpf}</TableCell>
+                      <TableCell>
+                        {format(new Date(patient.dataNascimento), "dd/MM/yyyy")}
+                      </TableCell>
+                      <TableCell>
+                        <span 
+                          className={`px-2 py-1 rounded-full text-xs font-medium
+                          ${patient.diagnostico === "DM1" ? "bg-teal-800 text-teal-50" : 
+                            patient.diagnostico === "DM2" ? "bg-teal-500 text-teal-50" : 
+                            "bg-teal-100 text-teal-500"}`}
+                        >
+                          {patient.diagnostico}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div>{patient.telefone}</div>
+                        <div className="text-sm text-muted-foreground">{patient.email}</div>
+                      </TableCell>
+                      <TableCell>
+                        {format(new Date(patient.dataCadastro), "dd/MM/yyyy")}
                       </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                      Nenhum paciente encontrado com os filtros atuais.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Paginação */}
           {!loading && !error && filteredPatients.length > 0 && (

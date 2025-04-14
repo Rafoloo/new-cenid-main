@@ -68,7 +68,7 @@ export default function LoginForm() {
     <div className="flex h-screen w-full bg-white">
       {/* Left sidebar */}
       <div className="hidden lg:flex lg:w-1/3 xl:w-2/5 bg-gradient-to-br from-teal-600 to-teal-800 flex-col relative overflow-hidden">
-        <div className="absolute inset-0 bg-teal-900/20 backdrop-blur-sm z-0"></div>
+        <div className="absolute inset-0 bg-blue-900/20 backdrop-blur-sm z-0"></div>
 
         <div className="p-12 z-10 flex-1 flex items-center justify-center">
           <div className="text-center">

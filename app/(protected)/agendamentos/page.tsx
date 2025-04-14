@@ -37,7 +37,9 @@ import {
 
 
 const formTypes = [
+  "Todos",
   "Medicina",
+  "Psicologia",
   "Psicologia",
   "Educação Física",
   "Nutrição",
@@ -62,7 +64,7 @@ const ConsultationModal = ({
   const getStatusColor = (status: string) => {
     const colors = {
       'Agendada': 'bg-yellow-500 text-white',
-      'Confirmada': 'bg-blue-500 text-white',
+      'Confirmada': 'bg-teal-500 text-white',
       'EmAndamento': 'bg-indigo-500 text-white',
       'Concluida': 'bg-green-500 text-white',
       'Cancelada': 'bg-red-500 text-white',

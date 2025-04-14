@@ -10,6 +10,7 @@ import { UserButton } from "@/components/auth/user-button";
 import {
   UserPlus,
   LayoutDashboard,
+  ClipboardCheck,
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
@@ -53,7 +54,7 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
   return (
     <div
       className={cn(
-        "bg-gradient-to-b from-teal-800 to-teal-950 text-white font-sans h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
+        "bg-gradient-to-b from-teal-800 to-teal-300 text-white font-sans h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-72",
         isVisible ? "translate-x-0" : "-translate-x-full",
         "fixed top-0 left-0 z-50",
@@ -107,6 +108,22 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
             <Link href="/cadastro" className="flex items-center space-x-3">
               <UserPlus className="h-5 w-5" />
               {!isCollapsed && <span className="text-base">Cadastro</span>}
+            </Link>
+          </Button>
+
+          {/* Dashboard primeiro */}
+          <Button
+            asChild
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-white/10 hover:text-white transition-colors",
+              isCollapsed && "justify-center px-0",
+              pathname === "/consulta" && "bg-white/10 font-semibold"
+            )}
+          >
+            <Link href="/consulta" className="flex items-center space-x-3">
+              <ClipboardCheck className="h-5 w-5" />
+              {!isCollapsed && <span className="text-base">Iniciar Consulta</span>}
             </Link>
           </Button>
         </nav>
