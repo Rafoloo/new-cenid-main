@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import InputMask from "react-input-mask";
@@ -30,7 +30,22 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CalendarIcon, ChevronLeft, ChevronRight, Clock, Stethoscope, Brain, ActivitySquare, Apple, ArrowLeft } from "lucide-react";
+import { 
+  CalendarIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  Clock, 
+  Stethoscope, 
+  Brain, 
+  ActivitySquare, 
+  Apple, 
+  ArrowLeft, 
+  Check, 
+  ChevronsUpDown,
+  Search,
+  User,
+  X 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -44,6 +59,15 @@ import { CaptionProps, useNavigation } from "react-day-picker";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Badge } from "@/components/ui/badge";
 
 type Specialty = 'Medicina' | 'Psicologia' | 'Educação Física' | 'Nutrição';
 
@@ -88,15 +112,12 @@ const CustomHeader = (props: { displayMonth: any }) => {
   );
 };
 
-// Função para validar CPF
 const validateCPF = (cpf: string) => {
   cpf = cpf.replace(/\D/g, '');
   if (cpf.length !== 11) return false;
 
-  // Elimina CPFs inválidos conhecidos
   if (/^(\d)\1+$/.test(cpf)) return false;
 
-  // Validação do primeiro dígito verificador
   let sum = 0;
   for (let i = 0; i < 9; i++) {
     sum += parseInt(cpf.charAt(i)) * (10 - i);
@@ -105,7 +126,6 @@ const validateCPF = (cpf: string) => {
   if (remainder === 10 || remainder === 11) remainder = 0;
   if (remainder !== parseInt(cpf.charAt(9))) return false;
 
-  // Validação do segundo dígito verificador
   sum = 0;
   for (let i = 0; i < 10; i++) {
     sum += parseInt(cpf.charAt(i)) * (11 - i);
@@ -123,7 +143,7 @@ const ConsultaSchema = z.object({
     (date) => {
       const selectedDate = new Date(date);
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normaliza para comparação apenas da data
+      today.setHours(0, 0, 0, 0);
       return selectedDate >= today;
     },
     "Data deve ser igual ou posterior a hoje"
@@ -207,6 +227,238 @@ interface InputMaskProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
+const predefinedTimes = [
+  "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
+  "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00"
+];
+
+const predefinedDurations = [15, 30, 45, 60, 90, 120];
+
+const predefinedProfessionals = {
+  Medicina: ["Dr. Carlos Silva", "Dra. Ana Souza", "Dr. Ricardo Freitas"],
+  Psicologia: ["Psi. Márcia Oliveira", "Psi. Thiago Mendes", "Psi. Júlia Costa"],
+  "Educação Física": ["Prof. Paulo Martins", "Profa. Camila Santos", "Prof. Gustavo Lima"],
+  Nutrição: ["Nut. Fernanda Pereira", "Nut. Daniel Almeida", "Nut. Roberta Dias"]
+};
+
+const consultTypesBySpecialty = {
+  Medicina: ["PrimeiraConsulta", "RetornoRegular", "Emergencia", "ControleGlicemico"],
+  Psicologia: ["PrimeiraConsulta", "RetornoRegular", "Psicologica"],
+  "Educação Física": ["PrimeiraConsulta", "RetornoRegular"],
+  Nutrição: ["PrimeiraConsulta", "RetornoRegular", "Nutricional"]
+};
+
+const PatientSelector = ({ form }: { form: UseFormReturn<ConsultaFormValues> }) => {
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/patients');
+        if (!response.ok) throw new Error('Falha ao buscar pacientes');
+        const data = await response.json();
+        setPatients(data);
+        // Inicialmente não mostra nenhum paciente
+        setFilteredPatients([]);
+      } catch (error) {
+        console.error('Erro ao buscar pacientes:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatients();
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      // Quando o campo de busca estiver vazio, não mostra nenhum paciente
+      setFilteredPatients([]);
+    } else {
+      // Filtra pacientes apenas quando há texto na busca
+      const filtered = patients.filter(
+        patient => 
+          patient.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+          patient.cpf.replace(/\D/g, "").includes(searchTerm.replace(/\D/g, ""))
+      );
+      setFilteredPatients(filtered);
+    }
+  }, [searchTerm, patients]);
+
+  const handleSelectPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    form.setValue("patientId", patient.id.toString());
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  const clearSelection = () => {
+    setSelectedPatient(null);
+    form.setValue("patientId", "");
+  };
+
+  return (
+    <FormField
+      control={form.control}
+      name="patientId"
+      render={({ field }) => (
+        <FormItem className="relative">
+          <FormLabel className="text-base font-medium text-gray-700">Paciente</FormLabel>
+          <div className="relative w-full">
+            {selectedPatient ? (
+              <div className="flex items-center justify-between p-3 border rounded-lg bg-teal-50 hover:bg-teal-100 transition-colors">
+                <div className="flex items-center space-x-3">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-teal-200 flex items-center justify-center">
+                    <User className="h-5 w-5 text-teal-700" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-gray-800">{selectedPatient.nome}</span>
+                    <span className="text-sm text-gray-500">CPF: {selectedPatient.cpf}</span>
+                  </div>
+                </div>
+                <div className="flex">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsOpen(true)}
+                    className="text-teal-600 hover:text-teal-800 mr-1"
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={clearSelection}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full flex justify-between items-center text-left p-3 h-auto border-gray-300 hover:border-teal-500 transition-colors"
+                onClick={() => setIsOpen(true)}
+              >
+                <span className="text-gray-500">Selecionar paciente</span>
+                <Search className="h-4 w-4 text-gray-500" />
+              </Button>
+            )}
+            
+            {isOpen && (
+              <div className="absolute z-50 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-96 flex flex-col">
+                <div className="sticky top-0 z-10 p-3 border-b bg-white rounded-t-lg">
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      className="w-full py-2 pl-10 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="Digite nome ou CPF para buscar..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      autoFocus
+                    />
+                    {searchTerm && (
+                      <button
+                        className="absolute inset-y-0 right-0 flex items-center pr-3"
+                        onClick={() => setSearchTerm("")}
+                      >
+                        <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="overflow-y-auto flex-grow">
+                  {isLoading ? (
+                    <div className="flex items-center justify-center p-6">
+                      <div className="text-gray-500">Carregando pacientes...</div>
+                    </div>
+                  ) : searchTerm.trim() === "" ? (
+                    <div className="flex flex-col items-center justify-center p-6">
+                      <div className="text-gray-500 mb-2">Digite para buscar pacientes</div>
+                    </div>
+                  ) : filteredPatients.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center p-6">
+                      <div className="text-gray-500 mb-2">Nenhum paciente encontrado</div>
+                    </div>
+                  ) : (
+                    <ul className="py-1">
+                      {filteredPatients.map((patient) => (
+                        <li key={patient.id}>
+                          <button
+                            type="button"
+                            className={cn(
+                              "w-full text-left px-4 py-3 hover:bg-teal-50 flex items-center justify-between",
+                              field.value === patient.id.toString() && "bg-teal-50"
+                            )}
+                            onClick={() => handleSelectPatient(patient)}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                <User className="h-4 w-4 text-gray-600" />
+                              </div>
+                              <div className="flex flex-col">
+                                <span className="font-medium">{patient.nome}</span>
+                                <span className="text-xs text-gray-500">CPF: {patient.cpf}</span>
+                              </div>
+                            </div>
+                            {field.value === patient.id.toString() && (
+                              <Check className="h-4 w-4 text-teal-600" />
+                            )}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                
+                <div className="sticky bottom-0 p-3 border-t bg-gray-50 rounded-b-lg">
+                  <div className="flex justify-between">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="text-gray-600"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsOpen(false);
+                      }}
+                      className="text-teal-600 border-teal-600 hover:bg-teal-50"
+                    >
+                      Cadastrar novo paciente
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+};
+
 const ConsultaForm = () => {
   const form = useForm<ConsultaFormValues>({
     resolver: zodResolver(ConsultaSchema),
@@ -248,121 +500,60 @@ const ConsultaForm = () => {
   });
 
   const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | null>(null);
-  const [patients, setPatients] = useState<Patient[]>([]);
   const [isNewPatient, setIsNewPatient] = useState(false);
-  const [isLoadingPatients, setIsLoadingPatients] = useState(true);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Buscar pacientes ao carregar o componente
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        setIsLoadingPatients(true);
-        const response = await fetch('/api/patients');
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to fetch patients');
-        }
-        const data = await response.json();
-        setPatients(data);
-      } catch (error) {
-        console.error('Error fetching patients:', error);
-        toast.error("Erro ao carregar pacientes. Por favor, recarregue a página.");
-      } finally {
-        setIsLoadingPatients(false);
-      }
-    };
-
-    fetchPatients();
-  }, []);
-
-  const handleSpecialtyClick = (specialty: Specialty) => {
-    if (selectedSpecialty === specialty) {
-      setSelectedSpecialty(null);
-      form.setValue('especialidade', '');
-    } else {
-      setSelectedSpecialty(specialty);
-      form.setValue('especialidade', specialty);
-    }
-  };
-
-  // No arquivo ConsultaForm.jsx ou ConsultaForm.tsx
-// Substitua a função onSubmit por esta versão corrigida:
-
-const onSubmit = async (data: ConsultaFormValues) => {
-  try {
-    setIsSubmitting(true);
-
-    if (!selectedSpecialty) {
-      toast.error("Selecione uma especialidade");
-      return;
-    }
-
-    // Validação adicional para garantir que o ID do paciente existe
-    if (!patients.some(p => p.id === parseInt(data.patientId))) {
-      toast.error("Paciente selecionado não é válido");
-      return;
-    }
-
-    // Verificar se a data e hora estão preenchidas
-    if (!data.dataConsulta || !data.horaConsulta) {
-      toast.error("Data e hora da consulta são obrigatórias");
-      return;
-    }
-
-    // Preparar dados para envio
-    const consultaData = {
-      ...data,
-      patientId: parseInt(data.patientId),
-      especialidade: selectedSpecialty,
-    };
-
-    console.log("Enviando dados:", consultaData);
-
-    const response = await fetch('/api/consultations', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(consultaData),
-    });
-
-    // Lidar com a resposta diretamente como JSON
-    const responseData = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(responseData.message || 'Falha ao criar consulta');
-    }
-
-    console.log("Resposta da API:", responseData);
-
-    // Sucesso no agendamento
-    toast.success("Consulta agendada com sucesso!");
-    
-    // Limpar formulário
-    form.reset();
-    setSelectedSpecialty(null);
-    
-    // Redirecionar após sucesso
-    router.push('/');
-    
-  } catch (error) {
-    console.error('Error creating consultation:', error);
-    toast.error(`Erro ao agendar consulta: ${error instanceof Error ? error.message : 'Tente novamente'}`);
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-  const onPatientSubmit = async (data: PatientFormValues) => {
+  const onSubmit = async (data: ConsultaFormValues) => {
     try {
-      const existingPatient = patients.find(p => p.cpf === data.cpf);
-      if (existingPatient) {
-        toast.error("CPF já cadastrado no sistema");
+      setIsSubmitting(true);
+
+      if (!selectedSpecialty) {
+        toast.error("Selecione uma especialidade");
         return;
       }
 
+      if (!data.dataConsulta || !data.horaConsulta) {
+        toast.error("Data e hora da consulta são obrigatórias");
+        return;
+      }
+
+      const consultaData = {
+        ...data,
+        especialidade: selectedSpecialty,
+      };
+
+      const response = await fetch('/api/consultations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(consultaData),
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Falha ao criar consulta');
+      }
+
+      toast.success("Consulta agendada com sucesso!");
+      
+      form.reset();
+      setSelectedSpecialty(null);
+      
+      router.push('/');
+      
+    } catch (error) {
+      console.error('Error creating consultation:', error);
+      toast.error(`Erro ao agendar consulta: ${error instanceof Error ? error.message : 'Tente novamente'}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const onPatientSubmit = async (data: PatientFormValues) => {
+    try {
       const response = await fetch('/api/patients', {
         method: 'POST',
         headers: {
@@ -381,8 +572,6 @@ const onSubmit = async (data: ConsultaFormValues) => {
       }
 
       const newPatient = await response.json();
-      setPatients([...patients, newPatient]);
-      form.setValue('patientId', String(newPatient.id));
       setIsNewPatient(false);
       patientForm.reset();
       toast.success("Paciente criado com sucesso!");
@@ -413,43 +602,12 @@ const onSubmit = async (data: ConsultaFormValues) => {
             <section className="space-y-4">
               <h2 className="text-lg font-medium text-teal-700">Dados do Paciente</h2>
               <Separator className="bg-teal-200" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="patientId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Selecionar Paciente</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="border-gray-300">
-                            <SelectValue placeholder={isLoadingPatients ? "Carregando..." : "Selecione um paciente"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {patients.map((patient) => (
-                            <SelectItem key={patient.id} value={String(patient.id)}>
-                              {patient.nome} (CPF: {patient.cpf})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        type="button"
-                        variant="link"
-                        onClick={() => setIsNewPatient(true)}
-                        className="mt-2 text-teal-600"
-                      >
-                        Cadastrar novo paciente
-                      </Button>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              
+              <PatientSelector form={form} />
+
               {isNewPatient && (
                 <Form {...patientForm}>
-                  <form onSubmit={patientForm.handleSubmit(onPatientSubmit)} className="space-y-4 border p-4 rounded-md">
+                  <form onSubmit={patientForm.handleSubmit(onPatientSubmit)} className="space-y-4 border p-4 rounded-md bg-gray-50">
                     <h3 className="text-md font-medium text-teal-700">Cadastrar Novo Paciente</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
@@ -530,7 +688,7 @@ const onSubmit = async (data: ConsultaFormValues) => {
                     "w-full p-4 h-auto flex flex-col gap-2",
                     selectedSpecialty === 'Medicina' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
-                  onClick={() => handleSpecialtyClick('Medicina')}
+                  onClick={() => setSelectedSpecialty('Medicina')}
                 >
                   <Stethoscope className="h-6 w-6" />
                   <span>Medicina</span>
@@ -542,7 +700,7 @@ const onSubmit = async (data: ConsultaFormValues) => {
                     "w-full p-4 h-auto flex flex-col gap-2",
                     selectedSpecialty === 'Psicologia' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
-                  onClick={() => handleSpecialtyClick('Psicologia')}
+                  onClick={() => setSelectedSpecialty('Psicologia')}
                 >
                   <Brain className="h-6 w-6" />
                   <span>Psicologia</span>
@@ -554,7 +712,7 @@ const onSubmit = async (data: ConsultaFormValues) => {
                     "w-full p-4 h-auto flex flex-col gap-2",
                     selectedSpecialty === 'Educação Física' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
-                  onClick={() => handleSpecialtyClick('Educação Física')}
+                  onClick={() => setSelectedSpecialty('Educação Física')}
                 >
                   <ActivitySquare className="h-6 w-6" />
                   <span>Educação Física</span>
@@ -566,7 +724,7 @@ const onSubmit = async (data: ConsultaFormValues) => {
                     "w-full p-4 h-auto flex flex-col gap-2",
                     selectedSpecialty === 'Nutrição' ? 'bg-teal-600 text-white' : 'border-teal-200'
                   )}
-                  onClick={() => handleSpecialtyClick('Nutrição')}
+                  onClick={() => setSelectedSpecialty('Nutrição')}
                 >
                   <Apple className="h-6 w-6" />
                   <span>Nutrição</span>
@@ -628,17 +786,32 @@ const onSubmit = async (data: ConsultaFormValues) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Horário da Consulta</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Input
-                            type="time"
-                            placeholder="00:00"
-                            className="border-gray-300"
-                            {...field}
-                          />
-                          <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        </div>
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um horário">
+                              {field.value ? (
+                                <div className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-2" />
+                                  {field.value}
+                                </div>
+                              ) : (
+                                "Selecione um horário"
+                              )}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {predefinedTimes.map((time) => (
+                            <SelectItem key={time} value={time}>
+                              <div className="flex items-center">
+                                <Clock className="h-4 w-4 mr-2" />
+                                {time}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -648,18 +821,24 @@ const onSubmit = async (data: ConsultaFormValues) => {
                   name="duracaoConsulta"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duração (minutos)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="15"
-                          max="240"
-                          placeholder="60"
-                          className="border-gray-300"
-                          value={field.value}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 60)}
-                        />
-                      </FormControl>
+                      <FormLabel>Duração da Consulta (minutos)</FormLabel>
+                      <div className="flex flex-wrap gap-2">
+                        {predefinedDurations.map((duration) => (
+                          <Button
+                            key={duration}
+                            type="button"
+                            variant={field.value === duration ? "default" : "outline"}
+                            size="sm"
+                            className={cn(
+                              "h-8",
+                              field.value === duration && "bg-teal-600 hover:bg-teal-700"
+                            )}
+                            onClick={() => field.onChange(duration)}
+                          >
+                            {duration} min
+                          </Button>
+                        ))}
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -695,9 +874,20 @@ const onSubmit = async (data: ConsultaFormValues) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Profissional</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Digite o nome do profissional" className="border-gray-300" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um profissional" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {selectedSpecialty && predefinedProfessionals[selectedSpecialty]?.map((prof) => (
+                            <SelectItem key={prof} value={prof}>
+                              {prof}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -750,54 +940,89 @@ const onSubmit = async (data: ConsultaFormValues) => {
               <h2 className="text-lg font-medium text-teal-700">Status e Prioridade</h2>
               <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="statusConsulta"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status da Consulta</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="border-gray-300">
-                            <SelectValue placeholder="Selecione o status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Agendada">Agendada</SelectItem>
-                          <SelectItem value="Confirmada">Confirmada</SelectItem>
-                          <SelectItem value="EmAndamento">Em Andamento</SelectItem>
-                          <SelectItem value="Concluida">Concluída</SelectItem>
-                          <SelectItem value="Cancelada">Cancelada</SelectItem>
-                          <SelectItem value="Remarcada">Remarcada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="prioridade"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Prioridade</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="border-gray-300">
-                            <SelectValue placeholder="Selecione a prioridade" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Baixa">Baixa</SelectItem>
-                          <SelectItem value="Media">Média</SelectItem>
-                          <SelectItem value="Alta">Alta</SelectItem>
-                          <SelectItem value="Urgente">Urgente</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="statusConsulta"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status da Consulta</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um status">
+                            {field.value && (
+                              <Badge className={cn(
+                                "mr-2",
+                                field.value === "Agendada" && "bg-blue-100 text-blue-800",
+                                field.value === "Confirmada" && "bg-green-100 text-green-800",
+                                field.value === "EmAndamento" && "bg-yellow-100 text-yellow-800",
+                                field.value === "Concluida" && "bg-teal-100 text-teal-800",
+                                field.value === "Cancelada" && "bg-red-100 text-red-800",
+                                field.value === "Remarcada" && "bg-purple-100 text-purple-800"
+                              )}>
+                                {field.value === "EmAndamento" ? "Em Andamento" : field.value}
+                              </Badge>
+                            )}
+                          </SelectValue>
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Agendada">
+                          <Badge className="bg-blue-100 text-blue-800 mr-2">Agendada</Badge>
+                        </SelectItem>
+                        <SelectItem value="Confirmada">
+                          <Badge className="bg-green-100 text-green-800 mr-2">Confirmada</Badge>
+                        </SelectItem>
+                        <SelectItem value="EmAndamento">
+                          <Badge className="bg-yellow-100 text-yellow-800 mr-2">Em Andamento</Badge>
+                        </SelectItem>
+                        <SelectItem value="Concluida">
+                          <Badge className="bg-teal-100 text-teal-800 mr-2">Concluída</Badge>
+                        </SelectItem>
+                        <SelectItem value="Cancelada">
+                          <Badge className="bg-red-100 text-red-800 mr-2">Cancelada</Badge>
+                        </SelectItem>
+                        <SelectItem value="Remarcada">
+                          <Badge className="bg-purple-100 text-purple-800 mr-2">Remarcada</Badge>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+                 <FormField
+                    control={form.control}
+                    name="prioridade"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Prioridade</FormLabel>
+                        <div className="flex gap-2">
+                          {["Baixa", "Media", "Alta", "Urgente"].map((prioridade) => (
+                            <Button
+                              key={prioridade}
+                              type="button"
+                              variant={field.value === prioridade ? "default" : "outline"}
+                              size="sm"
+                              className={cn(
+                                "flex-1",
+                                field.value === prioridade && (
+                                  prioridade === "Baixa" ? "bg-green-600 hover:bg-green-700" :
+                                  prioridade === "Media" ? "bg-blue-600 hover:bg-blue-700" :
+                                  prioridade === "Alta" ? "bg-orange-600 hover:bg-orange-700" :
+                                  "bg-red-600 hover:bg-red-700"
+                                )
+                              )}
+                              onClick={() => field.onChange(prioridade)}
+                            >
+                              {prioridade === "Media" ? "Média" : prioridade}
+                            </Button>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
               </div>
             </section>
 
@@ -879,18 +1104,23 @@ const onSubmit = async (data: ConsultaFormValues) => {
               <h2 className="text-lg font-medium text-teal-700">Acompanhamento</h2>
               <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="precisaAcompanhante"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <FormLabel>Precisa de Acompanhante</FormLabel>
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="precisaAcompanhante"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-medium cursor-pointer">
+                      Precisa de acompanhante
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
                 <div
                   className={cn(
                     "transition-all duration-300 ease-in-out md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4",
@@ -956,11 +1186,16 @@ const onSubmit = async (data: ConsultaFormValues) => {
                   control={form.control}
                   name="consultaRemota"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                       <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
-                      <FormLabel>Consulta Remota</FormLabel>
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Consulta remota
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
@@ -993,27 +1228,37 @@ const onSubmit = async (data: ConsultaFormValues) => {
               <h2 className="text-lg font-medium text-teal-700">Notificações</h2>
               <Separator className="bg-teal-200" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="enviarLembreteEmail"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                      <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                      </FormControl>
-                      <FormLabel>Enviar Lembrete por E-mail</FormLabel>
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={form.control}
+                name="enviarLembreteEmail"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-medium cursor-pointer">
+                      Enviar lembrete por email
+                    </FormLabel>
+                  </FormItem>
+                )}
+              />
                 <FormField
                   control={form.control}
                   name="enviarLembreteSMS"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                       <FormControl>
-                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
                       </FormControl>
-                      <FormLabel>Enviar Lembrete por SMS</FormLabel>
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        Enviar lembrete por SMS
+                      </FormLabel>
                     </FormItem>
                   )}
                 />
