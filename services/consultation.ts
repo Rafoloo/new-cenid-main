@@ -3,24 +3,20 @@ import { Consultation } from "@/types/consultation";
 
 export async function createConsultation(data: Consultation) {
   try {
-    // First, find or create the patient
     const patient = await db.patient.upsert({
       where: {
         cpf: data.cpf.replace(/\D/g, '')
       },
       update: {
         nome: data.nomePaciente,
-        // Add other fields you want to update if patient exists
       },
       create: {
         nome: data.nomePaciente,
         cpf: data.cpf.replace(/\D/g, ''),
-        email: '', // Required field, you might want to add this to your form
-        // Add other required patient fields
+        email: '', 
       }
     });
 
-    // Then create the consultation with the patient connection
     const consultation = await db.consultation.create({
       data: {
         patient: {
@@ -28,9 +24,7 @@ export async function createConsultation(data: Consultation) {
             id: patient.id
           }
         },
-        nomePaciente: data.nomePaciente,
-        cpf: data.cpf.replace(/\D/g, ''),
-        dataConsulta: new Date(data.dataConsulta),
+        dataConsulta: new Date(data.dataConsulta).toISOString(),
         horaConsulta: data.horaConsulta,
         duracaoConsulta: data.duracaoConsulta,
         tipoConsulta: data.tipoConsulta,

@@ -127,45 +127,36 @@ model Patient {
   outrosAuxilios                 String?  @map("outros_auxilios")
   possuiCelularComAcessoInternet String?  @map("possui_celular_com_acesso_a_internet")
   dateCadastro                   DateTime? @map("datecadastro")
-  consultations                  Consultation[]
+  consultations                  Consultation[] // Um Patient pode ter várias Consultations
 }
 
 model Consultation {
-  id                 String    @id @default(uuid()) @map("_id")
-  patientId          Int
-  patient            Patient   @relation(fields: [patientId], references: [id])
-  nomePaciente       String
-  cpf               String
-  dataConsulta      DateTime
-  horaConsulta      String
-  duracaoConsulta   Int       @map("duracao_consulta")
-  tipoConsulta      String    @map("tipo_consulta")
-  especialidade     String    @map("especialidade")
-  profissional      String    @map("profissional")
-  motivoConsulta    String    @map("motivo_consulta")
-  sintomasRelatados String?   @map("sintomas_relatados")
-  statusConsulta    String    @map("status_consulta")
-  prioridade        String    @map("prioridade")
-  
-  ultimaGlicemia     String?   @map("ultima_glicemia")
-  ultimaHemoglobina  String?   @map("ultima_hemoglobina")
-  medicamentos       String?   @map("medicamentos")
-  alergias          String?   @map("alergias")
-  
-  precisaAcompanhante    Boolean   @default(false) @map("precisa_acompanhante")
-  nomeAcompanhante      String?   @map("nome_acompanhante")
-  telefoneAcompanhante  String?   @map("telefone_acompanhante")
-  
-  salaAtendimento      String?   @map("sala_atendimento")
-  consultaRemota       Boolean   @default(false) @map("consulta_remota")
-  linkConsultaRemota   String?   @map("link_consulta_remota")
-  
-  enviarLembreteEmail  Boolean   @default(true) @map("enviar_lembrete_email")
-  enviarLembreteSMS    Boolean   @default(true) @map("enviar_lembrete_sms")
-  
-  observacoes         String?   @map("observacoes")
-  createdAt          DateTime  @default(now()) @map("created_at")
-  updatedAt          DateTime  @updatedAt @map("updated_at")
-
-  @@map("consultations")
+  id                  String    @id @default(uuid())
+  dataConsulta        String
+  horaConsulta        String
+  duracaoConsulta     Int
+  tipoConsulta        String
+  especialidade       String
+  profissional        String
+  motivoConsulta      String
+  sintomasRelatados   String?
+  statusConsulta      String
+  prioridade          String
+  ultimaGlicemia      String?
+  ultimaHemoglobina   String?
+  medicamentos        String?
+  alergias            String?
+  precisaAcompanhante Boolean
+  nomeAcompanhante    String?
+  telefoneAcompanhante String?
+  salaAtendimento     String?
+  consultaRemota      Boolean
+  linkConsultaRemota  String?
+  enviarLembreteEmail Boolean
+  enviarLembreteSMS   Boolean
+  observacoes         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  patientId           Int
+  patient             Patient   @relation(fields: [patientId], references: [id]) // Uma Consultation pertence a um Patient
 }
