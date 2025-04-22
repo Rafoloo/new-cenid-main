@@ -6,7 +6,7 @@ import FormularioMedicina from "@/components/auth/medicina-form"
 import FormularioPsicologia from "@/components/auth/psicologia-form"
 import FormularioEducacaoFisica from "@/components/auth/fisica-form"
 import FormularioNutricao from "@/components/auth/nutricao-form"
-import FormularioEnfermagem from "@/components/auth/medicina-form"
+import FormularioEnfermagem from "@/components/auth/enfermagem-form"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -18,11 +18,10 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
       <div className="max-w-5xl mx-auto p-4">
         <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
           <CardHeader className="bg-teal-100 p-4">
-            <CardTitle className="text-2xl font-bold text-teal-800">Cadastro de Consulta</CardTitle>
+            <CardTitle className="text-2xl font-bold text-teal-800">Iniciar Consulta</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="mb-6">
@@ -127,6 +126,5 @@ export default function Home() {
           </div>
         )} */}
       </div>
-    </div>
   )
 }

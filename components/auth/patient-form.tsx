@@ -208,7 +208,7 @@ const PatientForm = () => {
   return (
     <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
       <CardHeader className="bg-teal-100 p-4">
-        <CardTitle className="text-xl font-semibold text-teal-800">Cadastro de Paciente</CardTitle>
+        <CardTitle className="text-2xl font-semibold text-teal-800">Cadastro de Paciente</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <Form {...form}>
@@ -438,7 +438,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="gestante" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Gestante</FormLabel>
                   </FormItem>
@@ -465,7 +466,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="amamentando" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Amamentando</FormLabel>
                   </FormItem>
@@ -486,7 +488,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="deficiencia" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Possui Deficiência</FormLabel>
                   </FormItem>
@@ -515,7 +518,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="historicoDm1" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Histórico DM1</FormLabel>
                   </FormItem>
@@ -536,7 +540,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="historicoDm2" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Histórico DM2</FormLabel>
                   </FormItem>
@@ -557,7 +562,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="historicoOutrasFormasDm" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Outras Formas de DM</FormLabel>
                   </FormItem>
@@ -759,7 +765,8 @@ const PatientForm = () => {
                 <FormField control={form.control} name="possuiCelularComAcessoInternet" render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                     <FormControl>
-                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                       className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                     </FormControl>
                     <FormLabel>Celular com Internet</FormLabel>
                   </FormItem>
