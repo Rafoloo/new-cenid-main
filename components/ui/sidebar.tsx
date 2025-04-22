@@ -13,6 +13,7 @@ import {
   ClipboardCheck,
   ChevronRight,
   ChevronLeft,
+  Calculator,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -126,6 +127,22 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
               {!isCollapsed && <span className="text-base">Iniciar Consulta</span>}
             </Link>
           </Button>
+
+          <Button
+            asChild
+            variant="ghost"
+            className={cn(
+              "w-full justify-start text-white hover:bg-white/10 hover:text-white transition-colors",
+              isCollapsed && "justify-center px-0",
+              pathname === "/calculadora" && "bg-white/10 font-semibold"
+            )}
+          >
+            <Link href="/calculadora" className="flex items-center space-x-3">
+              <Calculator className="h-5 w-5" />
+              {!isCollapsed && <span className="text-base">Iniciar Consulta</span>}
+            </Link>
+          </Button>
+
         </nav>
       </ScrollArea>
 
