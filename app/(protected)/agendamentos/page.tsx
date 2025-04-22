@@ -10,21 +10,36 @@ import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   UserIcon, 
   CalendarIcon, 
   ClipboardIcon, 
   UsersIcon, 
-  MessageSquareIcon 
+  MessageSquareIcon,
+  PenIcon,
+  TrashIcon,
+  RefreshCwIcon
 } from "lucide-react";
 
 
 const formTypes = [
   "Todos",
   "Medicina",
+  "Psicologia",
   "Psicologia",
   "Educação Física",
   "Nutrição",
@@ -34,11 +49,15 @@ const formTypes = [
 const ConsultationModal = ({ 
   consultation, 
   isOpen, 
-  onClose 
+  onClose,
+  onEdit,
+  onDelete,
 }: { 
   consultation: Consultation | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit: (consultation: Consultation) => void;
+  onDelete: (consultationId: string) => void;
 }) => {
   if (!consultation) return null;
 
@@ -87,9 +106,9 @@ const ConsultationModal = ({
         <div className="grid grid-cols-2 gap-6">
           <Section icon={UserIcon} title="Dados do Paciente">
             <div className="space-y-2 text-gray-700">
-              <p><span className="font-semibold">Nome:</span> {consultation.nomePaciente}</p>
-              <p><span className="font-semibold">CPF:</span> {consultation.cpf}</p>
-              <p><span className="font-semibold">Email:</span> {consultation.email as string}</p>
+              <p><span className="font-semibold">Nome:</span> {consultation.nomePaciente || consultation.patient?.nome}</p>
+              <p><span className="font-semibold">CPF:</span> {consultation.cpf || consultation.patient?.cpf}</p>
+              <p><span className="font-semibold">Email:</span> {consultation.email || consultation.patient?.email}</p>
             </div>
           </Section>
 
@@ -135,6 +154,25 @@ const ConsultationModal = ({
             </div>
           )}
         </div>
+
+        <DialogFooter className="flex space-x-2 justify-end pt-4 mt-6 border-t border-gray-200">
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2 border-blue-500 text-blue-500 hover:bg-blue-50"
+            onClick={() => onEdit(consultation)}
+          >
+            <PenIcon className="h-4 w-4" />
+            Editar
+          </Button>
+          <Button 
+            variant="destructive"
+            className="flex items-center gap-2"
+            onClick={() => onDelete(consultation.id)}
+          >
+            <TrashIcon className="h-4 w-4" />
+            Excluir
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -144,51 +182,102 @@ export default function ConsultasPage() {
   const router = useRouter();
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedForm, setSelectedForm] = useState<typeof formTypes[number]>("Todos");
   const [selectedConsultation, setSelectedConsultation] = useState<Consultation | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [consultationToDeleteId, setConsultationToDeleteId] = useState<string | null>(null);
+
+  const fetchConsultations = async () => {
+    try {
+      setIsRefreshing(true);
+      const response = await fetch('/api/consultations');
+      if (!response.ok) throw new Error('Failed to fetch');
+      const data = await response.json();
+      
+      const processedData = data.map((consultation: any) => ({
+        ...consultation,
+        nomePaciente: consultation.patient?.nome,
+        cpf: consultation.patient?.cpf,
+        email: consultation.patient?.email,
+      }));
+      
+      setConsultations(processedData);
+    } catch (error) {
+      console.error('Error fetching consultations:', error);
+      toast.error("Erro ao carregar consultas");
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchConsultations = async () => {
-      try {
-        const response = await fetch('/api/consultations');
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        setConsultations(data);
-      } catch (error) {
-        console.error('Error fetching consultations:', error);
-        toast.error("Erro ao carregar consultas");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchConsultations();
   }, []);
+
+  const handleDeleteConsultation = async () => {
+    if (!consultationToDeleteId) return;
+    
+    try {
+      const response = await fetch(`/api/consultations/${consultationToDeleteId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erro ao excluir consulta');
+      }
+      
+      // Atualizar a lista de consultas
+      setConsultations(consultations.filter(cons => cons.id !== consultationToDeleteId));
+      toast.success("Consulta excluída com sucesso!");
+      
+      // Fechar diálogos
+      setIsDeleteDialogOpen(false);
+      setIsModalOpen(false);
+      setSelectedConsultation(null);
+      setConsultationToDeleteId(null);
+    } catch (error) {
+      console.error('Erro ao excluir consulta:', error);
+      toast.error("Erro ao excluir consulta");
+    }
+  };
+
+  const handleEditConsultation = (consultation: Consultation) => {
+    router.push(`/consulta/editar/${consultation.id}`);
+  };
+
+  const confirmDelete = (consultationId: string) => {
+    setConsultationToDeleteId(consultationId);
+    setIsDeleteDialogOpen(true);
+  };
 
   const renderConsultationCards = () => {
     let filteredConsultations = consultations;
     
     if (selectedForm !== "Todos") {
       filteredConsultations = consultations.filter(
-        consultation => consultation.especialidade.toLowerCase() === selectedForm.toLowerCase()
+        consultation => consultation.especialidade === selectedForm
       );
     }
 
     if (isLoading) {
-      return <div>Carregando...</div>;
+      return <div className="flex justify-center items-center py-8">Carregando...</div>;
     }
 
     if (filteredConsultations.length === 0) {
-      return <div className="text-gray-500">Nenhuma consulta encontrada.</div>;
+      return <div className="text-gray-500 text-center py-8">Nenhuma consulta encontrada.</div>;
     }
 
     const getStatusColor = (status: string) => {
       const colors = {
         Agendada: "bg-yellow-100 text-yellow-800",
-        EmAndamento: "bg-teal-100 text-teal-800",
+        Confirmada: "bg-blue-100 text-blue-800",
+        EmAndamento: "bg-indigo-100 text-indigo-800",
         Concluida: "bg-green-100 text-green-800",
-        Cancelada: "bg-red-100 text-red-800"
+        Cancelada: "bg-red-100 text-red-800",
+        Remarcada: "bg-purple-100 text-purple-800"
       };
       return colors[status as keyof typeof colors] || "";
     };
@@ -207,7 +296,7 @@ export default function ConsultasPage() {
             <CardContent className="p-4">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="font-semibold">Paciente: {consultation.nomePaciente}</h3>
+                  <h3 className="font-semibold">Paciente: {consultation.nomePaciente || consultation.patient?.nome}</h3>
                   <p className="text-sm text-gray-500">
                     Data: {new Date(consultation.dataConsulta).toLocaleDateString('pt-BR')}
                   </p>
@@ -233,12 +322,23 @@ export default function ConsultasPage() {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Gerenciamento de Consultas</h1>
-        <Button 
-          onClick={() => router.push("/cadastrar-consulta")}
-          className="bg-teal-600 hover:bg-teal-700 text-white"
-        >
-          Nova Consulta
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            onClick={fetchConsultations}
+            className="flex items-center gap-2"
+            disabled={isRefreshing}
+          >
+            <RefreshCwIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+          <Button 
+            onClick={() => router.push("/consulta")}
+            className="bg-teal-600 hover:bg-teal-700 text-white"
+          >
+            Nova Consulta
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="Todos" className="w-full">
@@ -270,8 +370,27 @@ export default function ConsultasPage() {
         onClose={() => {
           setIsModalOpen(false);
           setSelectedConsultation(null);
-        }} 
+        }}
+        onEdit={handleEditConsultation}
+        onDelete={confirmDelete}
       />
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta consulta? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConsultation} className="bg-red-600 hover:bg-red-700">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

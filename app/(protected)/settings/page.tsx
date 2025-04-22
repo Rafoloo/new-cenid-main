@@ -62,7 +62,12 @@ const SettingsPage = () => {
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      signIn();
+    },
+  });
   const [progress, setProgress] = useState(0);
 
   const form = useForm<z.infer<typeof SettingsSchema>>({
@@ -120,7 +125,7 @@ const SettingsPage = () => {
 
         if (data.success) {
           setSuccess(data.success);
-          await update();
+          await Date();
         }
       } catch (error) {
         console.error("[SETTINGS_ERROR]:", error);
@@ -136,10 +141,6 @@ const SettingsPage = () => {
         <p className="text-teal-800">Carregando...</p>
       </div>
     );
-  }
-
-  if (!session) {
-    return <div className="flex justify-center items-center h-screen">Você precisa estar autenticado para acessar esta página.</div>;
   }
 
   return (

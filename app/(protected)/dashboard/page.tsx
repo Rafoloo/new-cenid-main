@@ -34,7 +34,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -82,7 +81,16 @@ interface StatCardProps {
   className?: string;
 }
 
-// Componente de card de estatísticas
+const formatDateSafely = (dateString: string | null | undefined) => {
+  if (!dateString) return "N/A";
+  try {
+    return format(new Date(dateString), "dd/MM/yyyy");
+  } catch (error) {
+    console.error(`Error formatting date: ${dateString}`, error);
+    return "Data inválida";
+  }
+};
+
 const StatCard = ({ title, value, description, icon, className }: StatCardProps) => (
   <Card className={`${className}`}>
     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -106,78 +114,70 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [filterDiagnostico, setFilterDiagnostico] = useState("todos");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Dados de exemplo (seriam carregados da API)
-  const [patients, setPatients] = useState<Patient[]>([
-    {
-      id: "1",
-      nome: "João Silva",
-      cpf: "123.456.789-00",
-      dataNascimento: "1985-04-12",
-      diagnostico: "DM1",
-      telefone: "(11) 98765-4321",
-      email: "joao.silva@email.com",
-      dataCadastro: "2023-10-15",
-    },
-    {
-      id: "2",
-      nome: "Maria Oliveira",
-      cpf: "987.654.321-00",
-      dataNascimento: "1990-08-22",
-      diagnostico: "DM2",
-      telefone: "(11) 91234-5678",
-      email: "maria.oliveira@email.com",
-      dataCadastro: "2023-11-05",
-    },
-    {
-      id: "3",
-      nome: "Carlos Souza",
-      cpf: "456.789.123-00",
-      dataNascimento: "1975-01-30",
-      diagnostico: "LADA",
-      telefone: "(11) 95555-9999",
-      email: "carlos.souza@email.com",
-      dataCadastro: "2024-01-10",
-    },
-    {
-      id: "4",
-      nome: "Ana Costa",
-      cpf: "111.222.333-44",
-      dataNascimento: "2000-05-15",
-      diagnostico: "DM1",
-      telefone: "(11) 94444-8888",
-      email: "ana.costa@email.com",
-      dataCadastro: "2024-02-20",
-    },
-    {
-      id: "5",
-      nome: "Paulo Mendes",
-      cpf: "555.666.777-88",
-      dataNascimento: "1965-10-07",
-      diagnostico: "DM2",
-      telefone: "(11) 93333-7777",
-      email: "paulo.mendes@email.com",
-      dataCadastro: "2024-03-01",
-    },
-  ]);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
 
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/patients');
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar pacientes: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setPatients(data);
+      setError(null);
+    } catch (err) {
+      console.error("Erro ao buscar pacientes:", err);
+      setError("Não foi possível carregar os pacientes. Por favor, tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const getDiagnosticCounts = () => {
+    const counts = {
+      DM1: 0,
+      DM2: 0,
+      LADA: 0
+    };
+    
+    patients.forEach(patient => {
+      if (patient.diagnostico === "DM1") counts.DM1++;
+      else if (patient.diagnostico === "DM2") counts.DM2++;
+      else if (patient.diagnostico === "LADA") counts.LADA++;
+    });
+    
+    return counts;
+  };
+
+  const diagnosticCounts = getDiagnosticCounts();
+  
   const diagnosticData: DiagnosticData[] = [
-    { label: "DM1", value: 2, color: "#2563eb" }, // azul mais escuro
-    { label: "DM2", value: 2, color: "#60a5fa" }, // azul médio
-    { label: "LADA", value: 1, color: "#93c5fd" }, // azul claro
+    { label: "DM1", value: diagnosticCounts.DM1, color: "#00BFFF" }, 
+    { label: "DM2", value: diagnosticCounts.DM2, color: "#ADFF2F" }, 
+    { label: "LADA", value: diagnosticCounts.LADA, color: "#93c5fd" }, 
   ];
 
   const filteredPatients = patients.filter((patient) => {
-    const matchesSearch = patient.nome.toLowerCase().includes(search.toLowerCase()) || 
-                          patient.cpf.includes(search) ||
-                          patient.email.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = patient.nome?.toLowerCase().includes(search.toLowerCase()) || 
+                          patient.cpf?.includes(search) ||
+                          patient.email?.toLowerCase().includes(search.toLowerCase());
     
     const matchesDiagnostico = filterDiagnostico === "todos" || patient.diagnostico === filterDiagnostico;
     
     return matchesSearch && matchesDiagnostico;
   });
-
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -191,6 +191,15 @@ const Dashboard = () => {
 
   const navigateToPatientDetails = (id: string) => {
     router.push(`/paciente/${id}`);
+  };
+
+  // Formatar data com tratamento de erro
+  const formatDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), "dd/MM/yyyy");
+    } catch (error) {
+      return "Data inválida";
+    }
   };
 
   return (
@@ -319,6 +328,26 @@ const Dashboard = () => {
             </Select>
           </div>
 
+          {/* Indicador de carregamento e erro */}
+          {loading && (
+            <div className="flex justify-center items-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-4">
+              <p>{error}</p>
+              <Button 
+                onClick={fetchPatients} 
+                variant="outline" 
+                className="mt-2 text-sm"
+              >
+                Tentar novamente
+              </Button>
+            </div>
+          )}
+
           {/* Tabela */}
           <div className="rounded-md border">
             <Table>
@@ -343,7 +372,7 @@ const Dashboard = () => {
                       <TableCell className="font-medium">{patient.nome}</TableCell>
                       <TableCell>{patient.cpf}</TableCell>
                       <TableCell>
-                        {format(new Date(patient.dataNascimento), "dd/MM/yyyy")}
+                        {formatDateSafely(patient.dataNascimento)}
                       </TableCell>
                       <TableCell>
                         <span 
@@ -360,7 +389,7 @@ const Dashboard = () => {
                         <div className="text-sm text-muted-foreground">{patient.email}</div>
                       </TableCell>
                       <TableCell>
-                        {format(new Date(patient.dataCadastro), "dd/MM/yyyy")}
+                        {formatDateSafely(patient.dataCadastro)}
                       </TableCell>
                     </TableRow>
                   ))
@@ -376,66 +405,68 @@ const Dashboard = () => {
           </div>
 
           {/* Paginação */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center space-x-2">
-              <p className="text-sm text-muted-foreground">
-                Mostrando <span className="font-medium">{indexOfFirstItem + 1}</span> a{" "}
-                <span className="font-medium">
-                  {Math.min(indexOfLastItem, filteredPatients.length)}
-                </span>{" "}
-                de <span className="font-medium">{filteredPatients.length}</span> resultados
-              </p>
-              <Select
-                value={itemsPerPage.toString()}
-                onValueChange={(value) => setItemsPerPage(Number(value))}
-              >
-                <SelectTrigger className="w-[70px]">
-                  <SelectValue placeholder={itemsPerPage.toString()} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5">5</SelectItem>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
+          {!loading && !error && filteredPatients.length > 0 && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando <span className="font-medium">{indexOfFirstItem + 1}</span> a{" "}
+                  <span className="font-medium">
+                    {Math.min(indexOfLastItem, filteredPatients.length)}
+                  </span>{" "}
+                  de <span className="font-medium">{filteredPatients.length}</span> resultados
+                </p>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
+                  <SelectTrigger className="w-[70px]">
+                    <SelectValue placeholder={itemsPerPage.toString()} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => 
+                      page === 1 || 
+                      page === totalPages || 
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    )
+                    .map((page, index, array) => (
+                      <PaginationItem key={page}>
+                        {index > 0 && array[index - 1] !== page - 1 ? (
+                          <PaginationEllipsis />
+                        ) : null}
+                        <PaginationLink
+                          isActive={page === currentPage}
+                          onClick={() => setCurrentPage(page)}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(page => 
-                    page === 1 || 
-                    page === totalPages || 
-                    (page >= currentPage - 1 && page <= currentPage + 1)
-                  )
-                  .map((page, index, array) => (
-                    <PaginationItem key={page}>
-                      {index > 0 && array[index - 1] !== page - 1 ? (
-                        <PaginationEllipsis />
-                      ) : null}
-                      <PaginationLink
-                        isActive={page === currentPage}
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>

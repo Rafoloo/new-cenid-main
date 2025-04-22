@@ -20,7 +20,7 @@ export async function GET() {
       const body = await request.json();
       const newPatient = await prisma.patient.create({
         data: {
-          nome: body.nomePaciente, // Ajustado de 'name' para 'nome'
+          nome: body.nomePaciente, 
           cpf: body.cpf,
           email: body.email,
         },

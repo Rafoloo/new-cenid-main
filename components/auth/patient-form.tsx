@@ -77,6 +77,99 @@ const CustomHeader = (props: CaptionProps) => {
   );
 };
 
+// Constantes para as opções padronizadas
+const DIAGNOSTICO_OPTIONS = [
+  { value: "DM1", label: "Diabetes Mellitus Tipo 1 (DM1)" },
+  { value: "DM2", label: "Diabetes Mellitus Tipo 2 (DM2)" },
+  { value: "LADA", label: "Diabetes Autoimune Latente do Adulto (LADA)" },
+  { value: "MODY", label: "Maturity Onset Diabetes of the Young (MODY)" },
+  { value: "GESTACIONAL", label: "Diabetes Gestacional" },
+  { value: "OUTRO", label: "Outro" }
+];
+
+const METODO_INSULINA_OPTIONS = [
+  { value: "CANETA", label: "Caneta de Insulina" },
+  { value: "SERINGA", label: "Seringa" },
+  { value: "BOMBA", label: "Bomba de Insulina" },
+  { value: "NAO_USA", label: "Não Utiliza Insulina" }
+];
+
+const METODO_MONITORAMENTO_OPTIONS = [
+  { value: "GLICOMETRO", label: "Glicômetro Tradicional" },
+  { value: "SENSOR_FGM", label: "Sensor Flash (FGM)" },
+  { value: "SENSOR_CGM", label: "Sensor Contínuo (CGM)" },
+  { value: "MULTI", label: "Múltiplos Métodos" }
+];
+
+const TIPO_ATENDIMENTO_OPTIONS = [
+  { value: "SUS", label: "Sistema Único de Saúde (SUS)" },
+  { value: "CONVENIO", label: "Convênio/Plano de Saúde" },
+  { value: "PARTICULAR", label: "Particular" },
+  { value: "MISTO", label: "Misto (SUS + Outros)" }
+];
+
+const AUXILIO_OPTIONS = [
+  { value: "BPC", label: "Benefício de Prestação Continuada (BPC)" },
+  { value: "BOLSA_FAMILIA", label: "Bolsa Família" },
+  { value: "AUXILIO_DOENCA", label: "Auxílio Doença" },
+  { value: "APOSENTADORIA", label: "Aposentadoria por Invalidez" },
+  { value: "OUTRO", label: "Outro Auxílio" },
+  { value: "NENHUM", label: "Nenhum Auxílio" }
+];
+
+const APP_GLICEMIA_OPTIONS = [
+  { value: "LIBRE", label: "LibreLink" },
+  { value: "DEXCOM", label: "Dexcom" },
+  { value: "MEDTRONIC", label: "Medtronic" },
+  { value: "ACCU_CHEK", label: "Accu-Chek" },
+  { value: "ONETOUCH", label: "OneTouch" },
+  { value: "GLICOSOURCE", label: "GlicoSource" },
+  { value: "OUTRO", label: "Outro App" },
+  { value: "NAO_USA", label: "Não Utiliza App" }
+];
+
+const MARCAS_BOMBAS_OPTIONS = [
+  { value: "MEDTRONIC_MINIMED", label: "Medtronic MiniMed" },
+  { value: "ACCU_CHEK_COMBO", label: "Accu-Chek Combo" },
+  { value: "ACCU_CHEK_INSIGHT", label: "Accu-Chek Insight" },
+  { value: "OMNIPOD", label: "Omnipod" },
+  { value: "TANDEM", label: "Tandem t:slim X2" },
+  { value: "OUTRO", label: "Outro" }
+];
+
+const MARCAS_GLICOMETROS_SENSORES_OPTIONS = [
+  { value: "FREESTYLE_LIBRE", label: "FreeStyle Libre" },
+  { value: "FREESTYLE_LIBRE_2", label: "FreeStyle Libre 2" },
+  { value: "DEXCOM_G6", label: "Dexcom G6" },
+  { value: "DEXCOM_G7", label: "Dexcom G7" },
+  { value: "MEDTRONIC_GUARDIAN", label: "Medtronic Guardian" },
+  { value: "ACCU_CHEK_ACTIVE", label: "Accu-Chek Active" },
+  { value: "ACCU_CHEK_GUIDE", label: "Accu-Chek Guide" },
+  { value: "ONETOUCH_SELECT", label: "OneTouch Select Plus" },
+  { value: "ONETOUCH_ULTRA", label: "OneTouch Ultra" },
+  { value: "CONTOUR_PLUS", label: "Contour Plus" },
+  { value: "OTRO", label: "Outro" }
+];
+
+const TIPO_DEFICIENCIA_OPTIONS = [
+  { value: "FISICA", label: "Física" },
+  { value: "VISUAL", label: "Visual" },
+  { value: "AUDITIVA", label: "Auditiva" },
+  { value: "INTELECTUAL", label: "Intelectual" },
+  { value: "MULTIPLA", label: "Múltipla" },
+  { value: "OUTRO", label: "Outro" }
+];
+
+const PARENTESCO_OPTIONS = [
+  { value: "MAE", label: "Mãe" },
+  { value: "PAI", label: "Pai" },
+  { value: "IRMAO", label: "Irmão/Irmã" },
+  { value: "AVO", label: "Avô/Avó" },
+  { value: "TIO", label: "Tio/Tia" },
+  { value: "PRIMO", label: "Primo/Prima" },
+  { value: "OUTRO", label: "Outro" }
+];
+
 const PatientSchema = z.object({
   nome: z.string().min(1, "O nome completo deve ser preenchido"),
   cpf: z.string().min(1, "O CPF deve ser preenchido").regex(/\d{3}\.\d{3}\.\d{3}-\d{2}/, "O CPF deve estar no formato 000.000.000-00"),
@@ -86,59 +179,99 @@ const PatientSchema = z.object({
   dataNascimento: z.string().min(1, "A data de nascimento deve ser selecionada").refine((date) => !isNaN(Date.parse(date)), "A data de nascimento deve ser válida"),
   email: z.string().min(1, "O e-mail deve ser preenchido").email("O e-mail deve estar em um formato válido (exemplo@dominio.com)"),
   ocupacao: z.string().min(1, "A ocupação deve ser informada"),
-  sexo: z.enum(["Masculino", "Feminino", "Outro"]),
+  sexo: z.enum(["MASCULINO", "FEMININO", "OUTRO"]),
   endereco: z.string().min(1, "O endereço completo deve ser preenchido"),
   numero: z.string().min(1, "O número do endereço deve ser preenchido"),
   municipio: z.string().min(1, "O município deve ser informado"),
   tipoAtendimento: z.string().min(1, "O tipo de atendimento deve ser especificado"),
   diagnostico: z.string().min(1, "O diagnóstico deve ser informado"),
-  outrasFormasDm: z.string().min(1, "As outras formas de DM devem ser especificadas"),
+  outrasInformacoesDiagnostico: z.string().optional(),
   dataDiagnostico: z.string().min(1, "A data do diagnóstico deve ser selecionada").refine((date) => !isNaN(Date.parse(date)), "A data do diagnóstico deve ser válida"),
   metodoInsulina: z.string().min(1, "O método de aplicação de insulina deve ser especificado"),
-  marcaModeloBomba: z.string().min(1, "A marca e modelo da bomba devem ser informados"),
+  marcaModeloBomba: z.string().optional(),
+  outroMarcaModeloBomba: z.string().optional(),
   metodoMonitoramentoGlicemia: z.string().min(1, "O método de monitoramento da glicemia deve ser especificado"),
-  marcaModeloGlicometroSensor: z.string().min(1, "A marca e modelo do glicômetro ou sensor devem be informados"),
+  marcaModeloGlicometroSensor: z.string().min(1, "A marca e modelo do glicômetro ou sensor devem ser informados"),
+  outroMarcaModeloGlicometroSensor: z.string().optional(),
   usoAppGlicemia: z.string().min(1, "O uso de aplicativo de glicemia deve ser especificado"),
-  outrosApps: z.string().min(1, "Os outros aplicativos utilizados devem ser informados"),
+  outrosApps: z.string().optional(),
   nomeResponsavel: z.string().min(1, "O nome do responsável deve ser preenchido"),
   cpfResponsavel: z.string().min(1, "O CPF do responsável deve ser preenchido").regex(/\d{3}\.\d{3}\.\d{3}-\d{2}/, "O CPF do responsável deve estar no formato 000.000.000-00"),
   rgResponsavel: z.string().min(7, "O RG do responsável deve ter entre 7 e 14 dígitos").max(14, "O RG do responsável deve ter entre 7 e 14 dígitos"),
   parentescoResponsavel: z.string().min(1, "O parentesco do responsável deve ser informado"),
+  outroParentescoResponsavel: z.string().optional(),
   telefoneResponsavel: z.string().min(1, "O telefone do responsável deve ser preenchido").regex(/\(\d{2}\) \d{4,5}-\d{4}/, "O telefone do responsável deve estar no formato (00) 00000-0000"),
   ocupacaoResponsavel: z.string().min(1, "A ocupação do responsável deve ser informada"),
   dataNascimentoResponsavel: z.string().min(1, "A data de nascimento do responsável deve ser selecionada").refine((date) => !isNaN(Date.parse(date)), "A data de nascimento do responsável deve ser válida"),
   auxilio: z.string().min(1, "O tipo de auxílio deve ser especificado"),
-  outrosAuxilios: z.string().min(1, "Os outros auxílios devem ser informados"),
-  dateCadastro: z.string().min(1, "A data de cadastro deve ser selecionada").refine((date) => !isNaN(Date.parse(date)), "A data de cadastro deve ser válida"),
+  outrosAuxilios: z.string().optional(),
+  dataCadastro: z.string().min(1, "A data de cadastro deve ser selecionada").refine((date) => !isNaN(Date.parse(date)), "A data de cadastro deve ser válida"),
   gestante: z.boolean(),
   amamentando: z.boolean(),
   deficiencia: z.boolean(),
+  tipoDeficiencia: z.string().optional(),
+  outroTipoDeficiencia: z.string().optional(),
   historicoDm1: z.boolean(),
+  parentescoDm1: z.string().optional(),
+  outroParentescoDm1: z.string().optional(),
   historicoDm2: z.boolean(),
+  parentescoDm2: z.string().optional(),
+  outroParentescoDm2: z.string().optional(),
   historicoOutrasFormasDm: z.boolean(),
+  parentescoOutrasFormasDm: z.string().optional(),
+  outroParentescoOutrasFormasDm: z.string().optional(),
   possuiCelularComAcessoInternet: z.boolean(),
   semanasGestacao: z.number().min(1, "O número de semanas de gestação deve ser maior que 0").optional(),
   tempoPosParto: z.string().optional(),
-  tipoDeficiencia: z.string().optional(),
-  parentescoDm1: z.string().optional(),
-  parentescoDm2: z.string().optional(),
-  parentescoOutrasFormasDm: z.string().optional(),
   anexar: z.any().optional(),
 }).refine(
   (data) => !data.gestante || (data.semanasGestacao !== undefined && data.semanasGestacao > 0),
   { message: "O número de semanas de gestação deve ser informado e maior que 0 se gestante", path: ["semanasGestacao"] }
 ).refine(
-  (data) => !data.deficiencia || (data.tipoDeficiencia && data.tipoDeficiencia !== ""),
+  (data) => !data.deficiencia || data.tipoDeficiencia,
   { message: "O tipo de deficiência deve ser especificado quando há deficiência", path: ["tipoDeficiencia"] }
 ).refine(
-  (data) => !data.historicoDm1 || (data.parentescoDm1 && data.parentescoDm1 !== ""),
+  (data) => !data.historicoDm1 || data.parentescoDm1,
   { message: "O parentesco deve ser informado quando há histórico de DM1", path: ["parentescoDm1"] }
 ).refine(
-  (data) => !data.historicoDm2 || (data.parentescoDm2 && data.parentescoDm2 !== ""),
+  (data) => !data.historicoDm2 || data.parentescoDm2,
   { message: "O parentesco deve ser informado quando há histórico de DM2", path: ["parentescoDm2"] }
 ).refine(
-  (data) => !data.historicoOutrasFormasDm || (data.parentescoOutrasFormasDm && data.parentescoOutrasFormasDm !== ""),
+  (data) => !data.historicoOutrasFormasDm || data.parentescoOutrasFormasDm,
   { message: "O parentesco deve ser informado quando há histórico de outras formas de DM", path: ["parentescoOutrasFormasDm"] }
+).refine(
+  (data) => data.diagnostico !== "OUTRO" || (data.outrasInformacoesDiagnostico && data.outrasInformacoesDiagnostico !== ""),
+  { message: "As informações adicionais sobre o diagnóstico devem ser especificadas quando 'Outro' for selecionado", path: ["outrasInformacoesDiagnostico"] }
+).refine(
+  (data) => data.metodoInsulina !== "BOMBA" || data.marcaModeloBomba,
+  { message: "A marca e modelo da bomba devem ser informados quando usar bomba de insulina", path: ["marcaModeloBomba"] }
+).refine(
+  (data) => data.marcaModeloBomba !== "OUTRO" || (data.outroMarcaModeloBomba && data.outroMarcaModeloBomba !== ""),
+  { message: "Especifique a marca e modelo da bomba quando 'Outro' for selecionado", path: ["outroMarcaModeloBomba"] }
+).refine(
+  (data) => data.marcaModeloGlicometroSensor !== "OUTRO" || (data.outroMarcaModeloGlicometroSensor && data.outroMarcaModeloGlicometroSensor !== ""),
+  { message: "Especifique a marca e modelo do sensor/glicômetro quando 'Outro' for selecionado", path: ["outroMarcaModeloGlicometroSensor"] }
+).refine(
+  (data) => data.usoAppGlicemia !== "OUTRO" || (data.outrosApps && data.outrosApps !== ""),
+  { message: "Outros aplicativos devem ser especificados quando 'Outro App' for selecionado", path: ["outrosApps"] }
+).refine(
+  (data) => data.auxilio !== "OUTRO" || (data.outrosAuxilios && data.outrosAuxilios !== ""),
+  { message: "Outros auxílios devem ser especificados quando 'Outro Auxílio' for selecionado", path: ["outrosAuxilios"] }
+).refine(
+  (data) => data.tipoDeficiencia !== "OUTRO" || (data.outroTipoDeficiencia && data.outroTipoDeficiencia !== ""),
+  { message: "Especifique o tipo de deficiência quando 'Outro' for selecionado", path: ["outroTipoDeficiencia"] }
+).refine(
+  (data) => data.parentescoDm1 !== "OUTRO" || (data.outroParentescoDm1 && data.outroParentescoDm1 !== ""),
+  { message: "Especifique o parentesco quando 'Outro' for selecionado", path: ["outroParentescoDm1"] }
+).refine(
+  (data) => data.parentescoDm2 !== "OUTRO" || (data.outroParentescoDm2 && data.outroParentescoDm2 !== ""),
+  { message: "Especifique o parentesco quando 'Outro' for selecionado", path: ["outroParentescoDm2"] }
+).refine(
+  (data) => data.parentescoOutrasFormasDm !== "OUTRO" || (data.outroParentescoOutrasFormasDm && data.outroParentescoOutrasFormasDm !== ""),
+  { message: "Especifique o parentesco quando 'Outro' for selecionado", path: ["outroParentescoOutrasFormasDm"] }
+).refine(
+  (data) => data.parentescoResponsavel !== "OUTRO" || (data.outroParentescoResponsavel && data.outroParentescoResponsavel !== ""),
+  { message: "Especifique o parentesco quando 'Outro' for selecionado", path: ["outroParentescoResponsavel"] }
 );
 
 type PatientFormValues = z.infer<typeof PatientSchema>;
@@ -166,7 +299,7 @@ const PatientForm = () => {
       numero: "",
       tipoAtendimento: "",
       diagnostico: "",
-      outrasFormasDm: "",
+      outrasInformacoesDiagnostico: "",
       dataDiagnostico: "",
       gestante: false,
       semanasGestacao: undefined,
@@ -174,22 +307,29 @@ const PatientForm = () => {
       tempoPosParto: "",
       deficiencia: false,
       tipoDeficiencia: "",
+      outroTipoDeficiencia: "",
       historicoDm1: false,
       parentescoDm1: "",
+      outroParentescoDm1: "",
       historicoDm2: false,
       parentescoDm2: "",
+      outroParentescoDm2: "",
       historicoOutrasFormasDm: false,
       parentescoOutrasFormasDm: "",
+      outroParentescoOutrasFormasDm: "",
       metodoInsulina: "",
       marcaModeloBomba: "",
+      outroMarcaModeloBomba: "",
       metodoMonitoramentoGlicemia: "",
       marcaModeloGlicometroSensor: "",
+      outroMarcaModeloGlicometroSensor: "",
       usoAppGlicemia: "",
       outrosApps: "",
       nomeResponsavel: "",
       cpfResponsavel: "",
       rgResponsavel: "",
       parentescoResponsavel: "",
+      outroParentescoResponsavel: "",
       telefoneResponsavel: "",
       ocupacaoResponsavel: "",
       dataNascimentoResponsavel: "",
@@ -197,13 +337,27 @@ const PatientForm = () => {
       auxilio: "",
       outrosAuxilios: "",
       possuiCelularComAcessoInternet: false,
-      dateCadastro: "",
+      dataCadastro: getLocalDateString(new Date()), // Data atual por padrão
     },
   });
 
   const onSubmit = (data: PatientFormValues) => {
     console.log(data);
+    // Aqui você enviaria os dados para sua API
   };
+
+  // Observadores para campos dependentes
+  const watchDiagnostico = form.watch("diagnostico");
+  const watchMetodoInsulina = form.watch("metodoInsulina");
+  const watchUsoAppGlicemia = form.watch("usoAppGlicemia");
+  const watchAuxilio = form.watch("auxilio");
+  const watchMarcaModeloBomba = form.watch("marcaModeloBomba");
+  const watchMarcaModeloGlicometroSensor = form.watch("marcaModeloGlicometroSensor");
+  const watchTipoDeficiencia = form.watch("tipoDeficiencia");
+  const watchParentescoDm1 = form.watch("parentescoDm1");
+  const watchParentescoDm2 = form.watch("parentescoDm2");
+  const watchParentescoOutrasFormasDm = form.watch("parentescoOutrasFormasDm");
+  const watchParentescoResponsavel = form.watch("parentescoResponsavel");
 
   return (
     <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
@@ -306,16 +460,16 @@ const PatientForm = () => {
                 <FormField control={form.control} name="sexo" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Sexo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="border-gray-300">
                           <SelectValue placeholder="Selecione o sexo" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="Masculino">Masculino</SelectItem>
-                        <SelectItem value="Feminino">Feminino</SelectItem>
-                        <SelectItem value="Outro">Outro</SelectItem>
+                        <SelectItem value="MASCULINO">Masculino</SelectItem>
+                        <SelectItem value="FEMININO">Feminino</SelectItem>
+                        <SelectItem value="OUTRO">Outro</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -376,21 +530,50 @@ const PatientForm = () => {
                 <FormField control={form.control} name="tipoAtendimento" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tipo de Atendimento</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o tipo" className="border-gray-300" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border-gray-300">
+                          <SelectValue placeholder="Selecione o tipo de atendimento" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {TIPO_ATENDIMENTO_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="diagnostico" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Diagnóstico</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Digite o diagnóstico" className="border-gray-300" {...field} />
-                    </FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="border-gray-300">
+                          <SelectValue placeholder="Selecione o diagnóstico" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {DIAGNOSTICO_OPTIONS.map(option => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )} />
+                {watchDiagnostico === "OUTRO" && (
+                  <FormField control={form.control} name="outrasInformacoesDiagnostico" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Especifique o Diagnóstico</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Descreva o diagnóstico" className="border-gray-300" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
                 <FormField control={form.control} name="dataDiagnostico" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Data do Diagnóstico</FormLabel>
@@ -414,15 +597,6 @@ const PatientForm = () => {
                           />
                         </PopoverContent>
                       </Popover>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="outrasFormasDm" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Outras Formas de DM</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Especifique" className="border-gray-300" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -771,7 +945,7 @@ const PatientForm = () => {
                     <FormLabel>Celular com Internet</FormLabel>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="dateCadastro" render={({ field }) => (
+                <FormField control={form.control} name="dataCadastro" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Data de Cadastro</FormLabel>
                     <FormControl>
