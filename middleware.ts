@@ -23,7 +23,7 @@ export default auth((req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return Response.redirect(new URL("/dashboard", nextUrl));
     }
     return undefined;
   }
@@ -41,11 +41,9 @@ export default auth((req) => {
     );
   }
 
-  // Se nenhum caso anterior for atingido, retorne undefined
   return undefined;
 });
 
-// Optionally, don't invoke Middleware on some paths
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
