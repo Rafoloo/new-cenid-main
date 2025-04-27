@@ -1,114 +1,89 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const consultationId = params.id;
-    
-    const consultation = await prisma.consultation.findUnique({
-      where: { id: consultationId },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            nome: true,
-            cpf: true,
-            email: true,
-          },
-        },
-      },
+    const { id } = params;
+    const { statusConsulta } = await req.json();
+
+    // Validar statusConsulta
+    const validStatuses = [
+      "Agendada",
+      "Confirmada",
+      "EmAndamento",
+      "Concluida",
+      "Cancelada",
+      "Remarcada",
+    ];
+    if (!statusConsulta || !validStatuses.includes(statusConsulta)) {
+      return NextResponse.json(
+        { message: "Invalid or missing statusConsulta" },
+        { status: 400 }
+      );
+    }
+
+    // Verificar se a consulta existe
+    const existingConsultation = await prisma.consultation.findUnique({
+      where: { id },
     });
-
-    if (!consultation) {
-      return NextResponse.json({ message: 'Consulta não encontrada' }, { status: 404 });
+    if (!existingConsultation) {
+      return NextResponse.json(
+        { message: "Consultation not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(consultation, { status: 200 });
-  } catch (error) {
-    console.error('Erro ao buscar consulta:', error);
-    return NextResponse.json({ message: 'Erro ao buscar consulta' }, { status: 500 });
-  }
-}
-
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const consultationId = params.id;
-    const body = await request.json();
-
-    // Validações básicas
-    if (!body.statusConsulta) {
-      return NextResponse.json({ message: 'statusConsulta é obrigatório' }, { status: 400 });
-    }
-
+    // Atualizar a consulta
     const updatedConsultation = await prisma.consultation.update({
-      where: { id: consultationId },
-      data: {
-        dataConsulta: body.dataConsulta,
-        horaConsulta: body.horaConsulta,
-        duracaoConsulta: body.duracaoConsulta,
-        tipoConsulta: body.tipoConsulta,
-        especialidade: body.especialidade,
-        profissional: body.profissional,
-        motivoConsulta: body.motivoConsulta,
-        sintomasRelatados: body.sintomasRelatados,
-        statusConsulta: body.statusConsulta,
-        prioridade: body.prioridade,
-        ultimaGlicemia: body.ultimaGlicemia,
-        ultimaHemoglobina: body.ultimaHemoglobina,
-        medicamentos: body.medicamentos,
-        alergias: body.alergias,
-        precisaAcompanhante: body.precisaAcompanhante,
-        nomeAcompanhante: body.nomeAcompanhante,
-        telefoneAcompanhante: body.telefoneAcompanhante,
-        salaAtendimento: body.salaAtendimento,
-        consultaRemota: body.consultaRemota,
-        linkConsultaRemota: body.linkConsultaRemota,
-        enviarLembreteEmail: body.enviarLembreteEmail,
-        enviarLembreteSMS: body.enviarLembreteSMS,
-        observacoes: body.observacoes,
-        updatedAt: new Date(),
-      },
-      include: {
-        patient: {
-          select: {
-            id: true,
-            nome: true,
-            cpf: true,
-            email: true,
-          },
-        },
-      },
+      where: { id },
+      data: { statusConsulta },
+      include: { patient: true }, // Incluir patient para consistência com GET
     });
 
-    return NextResponse.json(updatedConsultation, { status: 200 });
+    return NextResponse.json(updatedConsultation);
   } catch (error) {
-    console.error('Erro ao atualizar consulta:', error);
-    return NextResponse.json({ message: 'Erro ao atualizar consulta' }, { status: 500 });
+    console.error("Error updating consultation:", error);
+    return NextResponse.json(
+      {
+        message: "Error updating consultation",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    const consultationId = params.id;
-    
+    const { id } = params;
+
+    // Verificar se a consulta existe
+    const existingConsultation = await prisma.consultation.findUnique({
+      where: { id },
+    });
+    if (!existingConsultation) {
+      return NextResponse.json(
+        { message: "Consultation not found" },
+        { status: 404 }
+      );
+    }
+
+    // Excluir a consulta
     await prisma.consultation.delete({
-      where: { id: consultationId },
+      where: { id },
     });
 
-    return NextResponse.json({ message: 'Consulta removida com sucesso' }, { status: 200 });
+    return NextResponse.json({ message: "Consultation deleted successfully" });
   } catch (error) {
-    console.error('Erro ao excluir consulta:', error);
-    return NextResponse.json({ message: 'Erro ao excluir consulta' }, { status: 500 });
+    console.error("Error deleting consultation:", error);
+    return NextResponse.json(
+      {
+        message: "Error deleting consultation",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
