@@ -43,6 +43,7 @@ const formTypes = [
   "Psicologia",
   "Educação Física",
   "Nutrição",
+  "Enfermagem",
 ] as const;
 
 const ConsultationModal = ({ 

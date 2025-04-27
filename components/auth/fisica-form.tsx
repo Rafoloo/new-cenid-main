@@ -132,7 +132,8 @@ export default function FormularioEducacaoFisica() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                     className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                   </FormControl>
                   <FormLabel className="text-teal-800">Gestante</FormLabel>
                 </FormItem>
@@ -195,7 +196,8 @@ export default function FormularioEducacaoFisica() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                     className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                   </FormControl>
                   <FormLabel className="text-teal-800">Lactação (amamentando)</FormLabel>
                 </FormItem>
@@ -236,7 +238,8 @@ export default function FormularioEducacaoFisica() {
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange}
+                     className="h-5 w-5 rounded border-teal-300 text-teal-600 focus:ring--500" />
                   </FormControl>
                   <FormLabel className="text-teal-800">Deficiência física</FormLabel>
                 </FormItem>
