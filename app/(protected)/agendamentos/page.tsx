@@ -45,14 +45,25 @@ const formTypes = [
   "Enfermagem",
 ] as const;
 
+// Status display mapping
+const statusDisplay = {
+  Agendada: "Agendada",
+  Confirmada: "Confirmada",
+  EmAndamento: "Em Andamento",
+  Concluida: "Concluída",
+  Cancelada: "Cancelada",
+  Remarcada: "Remarcada",
+};
+
+// Status backend mapping
+const statusBackend = {
+  "Em Andamento": "EmAndamento",
+  "Concluída": "Concluida",
+};
+
 const statusTypes = [
   "Todos",
-  "Agendada",
-  "Confirmada",
-  "EmAndamento",
-  "Concluida",
-  "Cancelada",
-  "Remarcada",
+  ...Object.keys(statusDisplay)
 ] as const;
 
 const ConsultationModal = ({
@@ -78,12 +89,23 @@ const ConsultationModal = ({
     const colors = {
       Agendada: "bg-yellow-500 text-white",
       Confirmada: "bg-teal-500 text-white",
+      "Em Andamento": "bg-indigo-500 text-white",
       EmAndamento: "bg-indigo-500 text-white",
+      Concluída: "bg-green-500 text-white",
       Concluida: "bg-green-500 text-white",
       Cancelada: "bg-red-500 text-white",
       Remarcada: "bg-purple-500 text-white",
     };
     return colors[status as keyof typeof colors] || "bg-gray-500 text-white";
+  };
+
+  const displayStatus = statusDisplay[consultation.statusConsulta as keyof typeof statusDisplay] || 
+                       consultation.statusConsulta;
+
+  const handleStatusClick = (displayStatus: string) => {
+    const backendStatus = statusBackend[displayStatus as keyof typeof statusBackend] || 
+                         displayStatus;
+    onUpdateStatus(consultation.id, backendStatus);
   };
 
   const Section = ({
@@ -114,10 +136,10 @@ const ConsultationModal = ({
             </DialogTitle>
             <span
               className={`px-4 py-2 rounded-md font-semibold ${getStatusColor(
-                consultation.statusConsulta
+                displayStatus
               )}`}
             >
-              {consultation.statusConsulta}
+              {displayStatus}
             </span>
           </div>
         </DialogHeader>
@@ -219,27 +241,25 @@ const ConsultationModal = ({
         <div className="mt-6 pt-4 border-t border-gray-200">
           <h3 className="text-lg font-bold text-teal-700 mb-4">Alterar Status</h3>
           <div className="flex flex-wrap gap-2">
-            {statusTypes
-              .filter((status) => status !== "Todos")
-              .map((status) => (
-                <Button
-                  key={status}
-                  variant={
-                    status === consultation.statusConsulta
-                      ? "default"
-                      : "outline"
-                  }
-                  className={`${
-                    status === consultation.statusConsulta
-                      ? getStatusColor(status)
-                      : ""
-                  }`}
-                  onClick={() => onUpdateStatus(consultation.id, status)}
-                  disabled={isUpdatingStatus}
-                >
-                  {status}
-                </Button>
-              ))}
+            {Object.values(statusDisplay).map((status) => (
+              <Button
+                key={status}
+                variant={
+                  status === displayStatus
+                    ? "default"
+                    : "outline"
+                }
+                className={`${
+                  status === displayStatus
+                    ? getStatusColor(status)
+                    : ""
+                }`}
+                onClick={() => handleStatusClick(status)}
+                disabled={isUpdatingStatus}
+              >
+                {status}
+              </Button>
+            ))}
           </div>
         </div>
 
@@ -349,32 +369,19 @@ export default function ConsultasPage() {
     }
   };
 
-  const normalizeStatus = (status: string) => {
-    const statusMap: { [key: string]: string } = {
-      Concluida: "Concluída",
-    };
-    return statusMap[status] || status;
-  };
-
   const handleUpdateStatus = async (consultationId: string, newStatus: string) => {
     setIsUpdatingStatus(true);
     try {
-      const normalizedStatus = normalizeStatus(newStatus);
-      console.log("Enviando PATCH para:", `/api/consultations/${consultationId}`, {
-        statusConsulta: normalizedStatus,
-      });
-
       const response = await fetch(`/api/consultations/${consultationId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           "Cache-Control": "no-cache",
         },
-        body: JSON.stringify({ statusConsulta: normalizedStatus }),
+        body: JSON.stringify({ statusConsulta: newStatus }),
       });
 
       const updatedConsultation = await response.json();
-      console.log("Resposta da API:", updatedConsultation);
 
       if (!response.ok) {
         throw new Error(
@@ -382,13 +389,11 @@ export default function ConsultasPage() {
         );
       }
 
-      setConsultations((prev) => {
-        const updatedConsultations = prev.map((cons) =>
+      setConsultations((prev) =>
+        prev.map((cons) =>
           cons.id === consultationId ? updatedConsultation : cons
-        );
-        console.log("Novo estado de consultations:", updatedConsultations);
-        return updatedConsultations;
-      });
+        )
+      );
 
       if (selectedConsultation && selectedConsultation.id === consultationId) {
         setSelectedConsultation(updatedConsultation);
@@ -426,12 +431,32 @@ export default function ConsultasPage() {
     }
 
     if (selectedStatus !== "Todos") {
+      const backendStatus = statusBackend[selectedStatus as keyof typeof statusBackend] || 
+                          selectedStatus;
       filtered = filtered.filter(
-        (consultation) => consultation.statusConsulta === selectedStatus
+        (consultation) => consultation.statusConsulta === backendStatus
       );
     }
 
     return filtered;
+  };
+
+  const getStatusColor = (status: string) => {
+    const colors = {
+      Agendada: "bg-yellow-100 text-yellow-800",
+      Confirmada: "bg-blue-100 text-blue-800",
+      "Em Andamento": "bg-indigo-100 text-indigo-800",
+      EmAndamento: "bg-indigo-100 text-indigo-800",
+      Concluída: "bg-green-100 text-green-800",
+      Concluida: "bg-green-100 text-green-800",
+      Cancelada: "bg-red-100 text-red-800",
+      Remarcada: "bg-purple-100 text-purple-800",
+    };
+    return colors[status as keyof typeof colors] || "";
+  };
+
+  const getDisplayStatus = (backendStatus: string) => {
+    return statusDisplay[backendStatus as keyof typeof statusDisplay] || backendStatus;
   };
 
   const renderConsultationCards = () => {
@@ -453,60 +478,52 @@ export default function ConsultasPage() {
       );
     }
 
-    const getStatusColor = (status: string) => {
-      const colors = {
-        Agendada: "bg-yellow-100 text-yellow-800",
-        Confirmada: "bg-blue-100 text-blue-800",
-        EmAndamento: "bg-indigo-100 text-indigo-800",
-        Concluida: "bg-green-100 text-green-800",
-        Cancelada: "bg-red-100 text-red-800",
-        Remarcada: "bg-purple-100 text-purple-800",
-      };
-      return colors[status as keyof typeof colors] || "";
-    };
-
     return (
       <div className="space-y-4">
-        {filteredConsultations.map((consultation) => (
-          <Card
-            key={consultation.id}
-            className="cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => {
-              setSelectedConsultation(consultation);
-              setIsModalOpen(true);
-            }}
-          >
-            <CardContent className="p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold">
-                    Paciente:{" "}
-                    {consultation.nomePaciente || consultation.patient?.nome}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Data:{" "}
-                    {new Date(consultation.dataConsulta).toLocaleDateString(
-                      "pt-BR"
-                    )}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Hora: {consultation.horaConsulta}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Especialidade: {consultation.especialidade}
-                  </p>
+        {filteredConsultations.map((consultation) => {
+          const displayStatus = getDisplayStatus(consultation.statusConsulta);
+          
+          return (
+            <Card
+              key={consultation.id}
+              className="cursor-pointer hover:shadow-md transition-shadow"
+              onClick={() => {
+                setSelectedConsultation(consultation);
+                setIsModalOpen(true);
+              }}
+            >
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-semibold">
+                      Paciente:{" "}
+                      {consultation.nomePaciente || consultation.patient?.nome}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Data:{" "}
+                      {new Date(consultation.dataConsulta).toLocaleDateString(
+                        "pt-BR"
+                      )}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Hora: {consultation.horaConsulta}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Especialidade: {consultation.especialidade}
+                    </p>
+                  </div>
+                  <div
+                    className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
+                      consultation.statusConsulta
+                    )}`}
+                  >
+                    {displayStatus}
+                  </div>
                 </div>
-                <div
-                  className={`px-3 py-1 rounded-full text-sm ${getStatusColor(
-                    consultation.statusConsulta
-                  )}`}
-                >
-                  {consultation.statusConsulta}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     );
   };
@@ -585,7 +602,7 @@ export default function ConsultasPage() {
                   value={status}
                   onClick={() => setSelectedStatus(status)}
                 >
-                  {status}
+                  {getDisplayStatus(status)}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -608,7 +625,7 @@ export default function ConsultasPage() {
             )}
             {selectedStatus !== "Todos" && (
               <span className="ml-2 text-sm font-normal text-gray-500">
-                Status: {selectedStatus}
+                Status: {getDisplayStatus(selectedStatus)}
               </span>
             )}
           </CardTitle>

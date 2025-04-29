@@ -28,7 +28,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    // Validar campos obrigatórios
     const {
       patientId,
       dataConsulta,
@@ -37,7 +36,7 @@ export async function POST(req: Request) {
       especialidade,
       profissional,
       motivoConsulta,
-      statusConsulta = "Agendada", // Status padrão
+      statusConsulta = "Agendada", 
     } = body;
 
     if (
@@ -55,7 +54,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validar statusConsulta
     const validStatuses = [
       "Agendada",
       "Confirmada",
