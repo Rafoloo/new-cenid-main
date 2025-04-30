@@ -158,5 +158,5 @@ model Consultation {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
   patientId           Int
-  patient             Patient   @relation(fields: [patientId], references: [id]) // Uma Consultation pertence a um Patient
+  patient             Patient   @relation(fields: [patientId], references: [id])
 }

@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import InputMask from "react-input-mask";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, getYear, getMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   Form,
@@ -60,13 +59,63 @@ const getLocalDateString = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+// Funções de formatação para máscaras
+const formatCPF = (value: string): string => {
+  const cleaned = value.replace(/\D/g, "").slice(0, 11);
+  const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})$/);
+  if (match) {
+    const [, p1, p2, p3, p4] = match;
+    return `${p1}${p2 ? "." + p2 : ""}${p3 ? "." + p3 : ""}${p4 ? "-" + p4 : ""}`;
+  }
+  return value;
+};
+
+const formatPhone = (value: string): string => {
+  const cleaned = value.replace(/\D/g, "").slice(0, 11);
+  const match = cleaned.match(/^(\d{0,2})(\d{0,5})(\d{0,4})$/);
+  if (match) {
+    const [, p1, p2, p3] = match;
+    return `${p1 ? "(" + p1 : ""}${p2 ? ") " + p2 : ""}${p3 ? "-" + p3 : ""}`;
+  }
+  return value;
+};
+
+const formatCartaoSus = (value: string): string => {
+  const cleaned = value.replace(/\D/g, "").slice(0, 15);
+  return cleaned;
+};
+
+const formatRG = (value: string): string => {
+  const cleaned = value.replace(/\D/g, "").slice(0, 14);
+  return cleaned;
+};
+
 // Componente personalizado para o cabeçalho do calendário
 const CustomHeader = (props: CaptionProps) => {
   const { goToMonth, nextMonth, previousMonth } = useNavigation();
   const { displayMonth } = props;
 
+  const currentYear = getYear(new Date());
+  const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => currentYear - i);
+  const months = Array.from({ length: 12 }, (_, i) =>
+    format(new Date(2020, i), "MMMM", { locale: ptBR })
+  );
+
+  const handleYearChange = (year: string) => {
+    const newDate = new Date(displayMonth);
+    newDate.setFullYear(Number(year));
+    goToMonth(newDate);
+  };
+
+  const handleMonthChange = (month: string) => {
+    const monthIndex = months.indexOf(month);
+    const newDate = new Date(displayMonth);
+    newDate.setMonth(monthIndex);
+    goToMonth(newDate);
+  };
+
   return (
-    <div className="flex justify-between items-center px-2 py-1">
+    <div className="flex justify-between items-center px-2 py-2">
       <button
         onClick={() => previousMonth && goToMonth(previousMonth)}
         className="text-gray-600 hover:text-gray-800"
@@ -74,9 +123,38 @@ const CustomHeader = (props: CaptionProps) => {
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
-      <span className="text-sm font-medium text-gray-800">
-        {format(displayMonth, "MMMM yyyy", { locale: ptBR })}
-      </span>
+      <div className="flex space-x-2">
+        <Select
+          value={getYear(displayMonth).toString()}
+          onValueChange={handleYearChange}
+        >
+          <SelectTrigger className="w-[100px] border-gray-300">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {years.map((year) => (
+              <SelectItem key={year} value={year.toString()}>
+                {year}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={format(displayMonth, "MMMM", { locale: ptBR })}
+          onValueChange={handleMonthChange}
+        >
+          <SelectTrigger className="w-[120px] border-gray-300">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((month) => (
+              <SelectItem key={month} value={month}>
+                {month}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <button
         onClick={() => nextMonth && goToMonth(nextMonth)}
         className="text-gray-600 hover:text-gray-800"
@@ -215,7 +293,7 @@ const PatientSchema = z
     ocupacao: z.string().min(1, "A ocupação deve ser informada"),
     sexo: z.enum(["MASCULINO", "FEMININO", "OUTRO"]),
     endereco: z.string().min(1, "O endereço completo deve ser preenchido"),
-    numero: z.string().min(1, "O número do endereço deve ser preenchido"),
+    numero: z.string().min(1, "O número do endereço deve be preenchido"),
     municipio: z.string().min(1, "O município deve ser informado"),
     tipoAtendimento: z.string().min(1, "O tipo de atendimento deve ser especificado"),
     diagnostico: z.string().min(1, "O diagnóstico deve ser informado"),
@@ -268,7 +346,7 @@ const PatientSchema = z
       .min(1, "A ocupação do responsável deve ser informada"),
     dataNascimentoResponsavel: z
       .string()
-      .min(1, "A data de nascimento do responsável deve ser selecionada")
+      .min(1, "A data de nascimento do responsável deve be selecionada")
       .refine(
         (date) => !isNaN(Date.parse(date)),
         "A data de nascimento do responsável deve ser válida"
@@ -438,6 +516,15 @@ const PatientForm = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const router = useRouter();
 
+  // Estados para controlar máscaras
+  const [cpf, setCpf] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [cartaoSus, setCartaoSus] = useState("");
+  const [rg, setRg] = useState("");
+  const [cpfResponsavel, setCpfResponsavel] = useState("");
+  const [telefoneResponsavel, setTelefoneResponsavel] = useState("");
+  const [rgResponsavel, setRgResponsavel] = useState("");
+
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(PatientSchema),
     defaultValues: {
@@ -564,6 +651,10 @@ const PatientForm = () => {
   const watchUsoAppGlicemia = form.watch("usoAppGlicemia");
   const watchAuxilio = form.watch("auxilio");
 
+  function Pieces(formatted: string) {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <>
       <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
@@ -610,16 +701,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>CPF</FormLabel>
                         <FormControl>
-                          <InputMask
-                            mask="999.999.999-99"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                          >
-                            {(inputProps: any) => (
-                              <Input placeholder="000.000.000-00" {...inputProps} />
-                            )}
-                          </InputMask>
+                          <Input
+                            placeholder="000.000.000-00"
+                            value={cpf}
+                            onChange={(e) => {
+                              const formatted = formatCPF(e.target.value);
+                              setCpf(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={14}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -632,7 +723,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>Cartão SUS</FormLabel>
                         <FormControl>
-                          <Input maxLength={15} placeholder="15 dígitos" {...field} />
+                          <Input
+                            placeholder="15 dígitos"
+                            value={cartaoSus}
+                            onChange={(e) => {
+                              const formatted = formatCartaoSus(e.target.value);
+                              setCartaoSus(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={15}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -645,7 +745,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>RG</FormLabel>
                         <FormControl>
-                          <Input placeholder="Digite o RG" {...field} />
+                          <Input
+                            placeholder="Digite o RG"
+                            value={rg}
+                            onChange={(e) => {
+                              const formatted = formatRG(e.target.value);
+                              setRg(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={14}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -658,16 +767,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>Telefone</FormLabel>
                         <FormControl>
-                          <InputMask
-                            mask="(99) 99999-9999"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                          >
-                            {(inputProps: any) => (
-                              <Input placeholder="(00) 00000-0000" {...inputProps} />
-                            )}
-                          </InputMask>
+                          <Input
+                            placeholder="(00) 00000-0000"
+                            value={telefone}
+                            onChange={(e) => {
+                              const formatted = formatPhone(e.target.value);
+                              setTelefone(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={15}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1290,7 +1399,7 @@ const PatientForm = () => {
                           <FormControl>
                             <Input placeholder="Descreva o parentesco" {...field} />
                           </FormControl>
-                          <FormMessage />
+                            <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -1498,16 +1607,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>CPF do Responsável</FormLabel>
                         <FormControl>
-                          <InputMask
-                            mask="999.999.999-99"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                          >
-                            {(inputProps: any) => (
-                              <Input placeholder="000.000.000-00" {...inputProps} />
-                            )}
-                          </InputMask>
+                          <Input
+                            placeholder="000.000.000-00"
+                            value={cpfResponsavel}
+                            onChange={(e) => {
+                              const formatted = formatCPF(e.target.value);
+                              setCpfResponsavel(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={14}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1520,7 +1629,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>RG do Responsável</FormLabel>
                         <FormControl>
-                          <Input placeholder="Digite o RG" className="border-gray-300" {...field} />
+                          <Input
+                            placeholder="Digite o RG"
+                            value={rgResponsavel}
+                            onChange={(e) => {
+                              const formatted = formatRG(e.target.value);
+                              setRgResponsavel(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={14}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1572,16 +1690,16 @@ const PatientForm = () => {
                       <FormItem>
                         <FormLabel>Telefone do Responsável</FormLabel>
                         <FormControl>
-                          <InputMask
-                            mask="(99) 99999-9999"
-                            value={field.value}
-                            onChange={field.onChange}
-                            onBlur={field.onBlur}
-                          >
-                            {(inputProps: any) => (
-                              <Input placeholder="(00) 00000-0000" {...inputProps} />
-                            )}
-                          </InputMask>
+                          <Input
+                            placeholder="(00) 00000-0000"
+                            value={telefoneResponsavel}
+                            onChange={(e) => {
+                              const formatted = formatPhone(e.target.value);
+                              setTelefoneResponsavel(formatted);
+                              field.onChange(formatted);
+                            }}
+                            maxLength={15}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

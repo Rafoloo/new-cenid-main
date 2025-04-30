@@ -1,14 +1,7 @@
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Dashboard | CENID",
-  description: "Painel de controle do sistema CENID",
-};
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="__className_d65c78">
+      {children}
+    </div>
+  );
 }

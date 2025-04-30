@@ -1,91 +1,130 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { z } from 'zod';
+// /app/api/patients/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { z } from "zod";
 
-const prisma = new PrismaClient();
+// Criar uma única instância do Prisma Client
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const prisma = globalForPrisma.prisma || new PrismaClient({
+  log: ["query", "info", "warn", "error"],
+});
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
+// Função para tentar reconectar com retry
+const retryOperation = async <T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  delayMs: number = 2000
+): Promise<T> => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (attempt === maxRetries) throw error;
+      console.warn(`Tentativa ${attempt} falhou. Tentando novamente em ${delayMs}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+  throw new Error("Número máximo de tentativas excedido.");
+};
+
+// Ajustar o schema Zod para compatibilidade com o dashboard
 const PatientSchema = z.object({
-  nome: z.string().min(1).optional(),
-  cpf: z.string().min(1).regex(/\d{3}\.\d{3}\.\d{3}-\d{2}/).optional(),
-  cartaoSus: z.string().min(1).length(15).optional(),
-  rg: z.string().min(7).max(14).optional(),
-  telefone: z.string().min(1).regex(/\(\d{2}\) \d{4,5}-\d{4}/).optional(),
-  dataNascimento: z.string().min(1).optional(),
-  email: z.string().min(1).email(),
-  ocupacao: z.string().min(1).optional(),
+  nome: z.string().min(1, "Nome é obrigatório"),
+  cpf: z.string().regex(/\d{3}\.\d{3}\.\d{3}-\d{2}/, "CPF inválido").optional(),
+  cartaoSus: z.string().length(15, "Cartão SUS deve ter 15 dígitos").optional(),
+  rg: z.string().min(7).max(14, "RG inválido").optional(),
+  telefone: z.string().regex(/\(\d{2}\) \d{4,5}-\d{4}/, "Telefone inválido").optional(),
+  dataNascimento: z.string().min(1, "Data de nascimento é obrigatória"),
+  email: z.string().email("Email inválido"),
+  ocupacao: z.string().optional(),
   sexo: z.enum(["MASCULINO", "FEMININO", "OUTRO"]).optional(),
-  endereco: z.string().min(1).optional(),
-  numero: z.string().min(1).optional(),
-  municipio: z.string().min(1).optional(),
-  tipoAtendimento: z.string().min(1).optional(),
-  diagnostico: z.string().min(1).optional(),
+  endereco: z.string().optional(),
+  numero: z.string().optional(),
+  municipio: z.string().optional(),
+  tipoAtendimento: z.string().optional(),
+  diagnostico: z.string().optional(),
   outrasFormasDm: z.string().optional(),
-  dataDiagnostico: z.string().min(1).optional(),
-  gestante: z.string().min(1).optional(),
+  dataDiagnostico: z.string().optional(),
+  gestante: z.string().optional(),
   semanasGestacao: z.number().min(1).optional(),
-  amamentando: z.string().min(1).optional(),
+  amamentando: z.string().optional(),
   tempoPosParto: z.string().optional(),
-  deficiencia: z.string().min(1).optional(),
+  deficiencia: z.string().optional(),
   tipoDeficiencia: z.string().optional(),
-  historicoDm1: z.string().min(1).optional(),
+  historicoDm1: z.string().optional(),
   parentescoDm1: z.string().optional(),
-  historicoDm2: z.string().min(1).optional(),
+  historicoDm2: z.string().optional(),
   parentescoDm2: z.string().optional(),
-  historicoOutrasFormasDm: z.string().min(1).optional(),
+  historicoOutrasFormasDm: z.string().optional(),
   parentescoOutrasFormasDm: z.string().optional(),
-  metodoInsulina: z.string().min(1).optional(),
+  metodoInsulina: z.string().optional(),
   marcaModeloBomba: z.string().optional(),
-  metodoMonitoramentoGlicemia: z.string().min(1).optional(),
-  marcaModeloGlicometroSensor: z.string().min(1).optional(),
-  usoAppGlicemia: z.string().min(1).optional(),
+  metodoMonitoramentoGlicemia: z.string().optional(),
+  marcaModeloGlicometroSensor: z.string().optional(),
+  usoAppGlicemia: z.string().optional(),
   outrosApps: z.string().optional(),
-  nomeResponsavel: z.string().min(1).optional(),
-  cpfResponsavel: z.string().min(1).regex(/\d{3}\.\d{3}\.\d{3}-\d{2}/).optional(),
-  rgResponsavel: z.string().min(7).max(14).optional(),
-  parentescoResponsavel: z.string().min(1).optional(),
-  telefoneResponsavel: z.string().min(1).regex(/\(\d{2}\) \d{4,5}-\d{4}/).optional(),
-  ocupacaoResponsavel: z.string().min(1).optional(),
-  dataNascimentoResponsavel: z.string().min(1).optional(),
-  auxilio: z.string().min(1).optional(),
+  nomeResponsavel: z.string().optional(),
+  cpfResponsavel: z.string().regex(/\d{3}\.\d{3}\.\d{3}-\d{2}/, "CPF do responsável inválido").optional(),
+  rgResponsavel: z.string().min(7).max(14, "RG do responsável inválido").optional(),
+  parentescoResponsavel: z.string().optional(),
+  telefoneResponsavel: z.string().regex(/\(\d{2}\) \d{4,5}-\d{4}/, "Telefone do responsável inválido").optional(),
+  ocupacaoResponsavel: z.string().optional(),
+  dataNascimentoResponsavel: z.string().optional(),
+  auxilio: z.string().optional(),
   outrosAuxilios: z.string().optional(),
-  possuiCelularComAcessoInternet: z.string().min(1).optional(),
-  dateCadastro: z.string().min(1).optional(),
+  possuiCelularComAcessoInternet: z.string().optional(),
+  dataCadastro: z.string().optional(),
 });
 
 export async function GET() {
   try {
-    const patients = await prisma.patient.findMany();
-    return NextResponse.json(patients, { status: 200 });
-  } catch (error) {
-    console.error('Erro ao buscar pacientes:', error);
+    console.log("DATABASE_URL:", process.env.DATABASE_URL);
+
+    const patients = await retryOperation(async () => {
+      return await prisma.patient.findMany();
+    });
+
+    const formattedPatients = patients.map((patient) => ({
+      ...patient,
+      dataNascimento: patient.dataNascimento ? patient.dataNascimento.toISOString().split("T")[0] : "",
+      dataDiagnostico: patient.dataDiagnostico ? patient.dataDiagnostico.toISOString().split("T")[0] : "",
+      dataNascimentoResponsavel: patient.dataNascimentoResponsavel ? patient.dataNascimentoResponsavel.toISOString().split("T")[0] : "",
+      dataCadastro: patient.dateCadastro ? patient.dateCadastro.toISOString().split("T")[0] : "",
+    }));
+
+    return NextResponse.json(formattedPatients, { status: 200 });
+  } catch (error: unknown) {
+    // Verificar se error é uma instância de Error
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
+    console.error("Erro ao buscar pacientes:", error);
     return NextResponse.json(
-      { message: 'Erro ao buscar pacientes' }, 
+      { message: "Erro ao buscar pacientes", error: errorMessage },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
-    // Converter campos booleanos para string antes da validação
+
     const convertedBody = {
       ...body,
-      gestante: body.gestante ? 'SIM' : 'NÃO',
-      amamentando: body.amamentando ? 'SIM' : 'NÃO',
-      deficiencia: body.deficiencia ? 'SIM' : 'NÃO',
-      historicoDm1: body.historicoDm1 ? 'SIM' : 'NÃO',
-      historicoDm2: body.historicoDm2 ? 'SIM' : 'NÃO',
-      historicoOutrasFormasDm: body.historicoOutrasFormasDm ? 'SIM' : 'NÃO',
-      possuiCelularComAcessoInternet: body.possuiCelularComAcessoInternet ? 'SIM' : 'NÃO',
-      // Corrigindo o nome do campo para dateCadastro conforme seu schema
-      dateCadastro: body.dataCadastro || new Date().toISOString()
+      gestante: body.gestante ? "SIM" : "NÃO",
+      amamentando: body.amamentando ? "SIM" : "NÃO",
+      deficiencia: body.deficiencia ? "SIM" : "NÃO",
+      historicoDm1: body.historicoDm1 ? "SIM" : "NÃO",
+      historicoDm2: body.historicoDm2 ? "SIM" : "NÃO",
+      historicoOutrasFormasDm: body.historicoOutrasFormasDm ? "SIM" : "NÃO",
+      possuiCelularComAcessoInternet: body.possuiCelularComAcessoInternet ? "SIM" : "NÃO",
+      dataCadastro: body.dataCadastro || new Date().toISOString().split("T")[0],
     };
 
     const validatedData = PatientSchema.parse(convertedBody);
-    
-    // Criar objeto apenas com campos que existem no modelo Prisma
+
     const dataToCreate = {
       nome: validatedData.nome,
       cpf: validatedData.cpf,
@@ -127,44 +166,55 @@ export async function POST(request: NextRequest) {
       parentescoResponsavel: validatedData.parentescoResponsavel,
       telefoneResponsavel: validatedData.telefoneResponsavel,
       ocupacaoResponsavel: validatedData.ocupacaoResponsavel,
-      dataNascimentoResponsavel: validatedData.dataNascimentoResponsavel ? new Date(validatedData.dataNascimentoResponsavel) : null,
+      dataNascimentoResponsavel: validatedData.dataNascimentoResponsavel
+        ? new Date(validatedData.dataNascimentoResponsavel)
+        : null,
       auxilio: validatedData.auxilio,
       outrosAuxilios: validatedData.outrosAuxilios,
       possuiCelularComAcessoInternet: validatedData.possuiCelularComAcessoInternet,
-      dateCadastro: validatedData.dateCadastro ? new Date(validatedData.dateCadastro) : new Date(),
+      dateCadastro: validatedData.dataCadastro ? new Date(validatedData.dataCadastro) : new Date(),
     };
 
-    const newPatient = await prisma.patient.create({
-      data: dataToCreate,
+    const newPatient = await retryOperation(async () => {
+      return await prisma.patient.create({
+        data: dataToCreate,
+      });
     });
 
-    return NextResponse.json(newPatient, { status: 201 });
+    const formattedPatient = {
+      ...newPatient,
+      dataNascimento: newPatient.dataNascimento ? newPatient.dataNascimento.toISOString().split("T")[0] : "",
+      dataDiagnostico: newPatient.dataDiagnostico ? newPatient.dataDiagnostico.toISOString().split("T")[0] : "",
+      dataNascimentoResponsavel: newPatient.dataNascimentoResponsavel
+        ? newPatient.dataNascimentoResponsavel.toISOString().split("T")[0]
+        : "",
+      dataCadastro: newPatient.dateCadastro ? newPatient.dateCadastro.toISOString().split("T")[0] : "",
+    };
+
+    return NextResponse.json(formattedPatient, { status: 201 });
   } catch (error: unknown) {
-    console.error('Erro ao criar paciente:', error);
-    
+    console.error("Erro ao criar paciente:", error);
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { 
-          message: 'Dados inválidos',
-          errors: error.errors 
-        }, 
+        {
+          message: "Dados inválidos",
+          errors: error.errors,
+        },
         { status: 400 }
       );
     }
-    
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { 
-          message: 'Erro ao criar paciente',
-          error: error.message 
-        }, 
-        { status: 500 }
-      );
-    }
-    
+
+    // Verificar se error é uma instância de Error
+    const errorMessage = error instanceof Error ? error.message : "Erro desconhecido";
     return NextResponse.json(
-      { message: 'Erro desconhecido ao criar paciente' }, 
+      {
+        message: "Erro ao criar paciente",
+        error: errorMessage,
+      },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
