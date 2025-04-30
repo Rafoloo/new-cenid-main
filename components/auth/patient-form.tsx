@@ -97,9 +97,6 @@ const CustomHeader = (props: CaptionProps) => {
 
   const currentYear = getYear(new Date());
   const years = Array.from({ length: currentYear - 1920 + 1 }, (_, i) => currentYear - i);
-  const months = Array.from({ length: 12 }, (_, i) =>
-    format(new Date(2020, i), "MMMM", { locale: ptBR })
-  );
 
   const handleYearChange = (year: string) => {
     const newDate = new Date(displayMonth);
@@ -107,60 +104,47 @@ const CustomHeader = (props: CaptionProps) => {
     goToMonth(newDate);
   };
 
-  const handleMonthChange = (month: string) => {
-    const monthIndex = months.indexOf(month);
+  const handleMonthChange = (offset: number) => {
     const newDate = new Date(displayMonth);
-    newDate.setMonth(monthIndex);
+    newDate.setMonth(displayMonth.getMonth() + offset);
     goToMonth(newDate);
   };
 
   return (
-    <div className="flex justify-between items-center px-2 py-2">
+    <div className="flex items-center justify-between px-3 py-2 bg-teal-50 rounded-t-md border-b border-teal-200">
       <button
-        onClick={() => previousMonth && goToMonth(previousMonth)}
-        className="text-gray-600 hover:text-gray-800"
+        onClick={() => previousMonth && handleMonthChange(-1)}
+        className="p-1 rounded-full text-teal-600 hover:bg-teal-100 disabled:opacity-50 disabled:hover:bg-transparent"
         disabled={!previousMonth}
       >
-        <ChevronLeft className="h-5 w-5" />
+        <ChevronLeft className="h-4 w-4" />
       </button>
-      <div className="flex space-x-2">
+      <div className="flex items-center space-x-2">
+        <span className="text-sm font-medium text-teal-800 capitalize">
+          {format(displayMonth, "MMMM yyyy", { locale: ptBR })}
+        </span>
         <Select
           value={getYear(displayMonth).toString()}
           onValueChange={handleYearChange}
         >
-          <SelectTrigger className="w-[100px] border-gray-300">
+          <SelectTrigger className="w-[80px] h-8 text-sm border-teal-300 focus:ring-teal-500">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="max-h-60 overflow-y-auto">
             {years.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
+              <SelectItem key={year} value={year.toString()} className="text-sm">
                 {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={format(displayMonth, "MMMM", { locale: ptBR })}
-          onValueChange={handleMonthChange}
-        >
-          <SelectTrigger className="w-[120px] border-gray-300">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {months.map((month) => (
-              <SelectItem key={month} value={month}>
-                {month}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <button
-        onClick={() => nextMonth && goToMonth(nextMonth)}
-        className="text-gray-600 hover:text-gray-800"
+        onClick={() => nextMonth && handleMonthChange(1)}
+        className="p-1 rounded-full text-teal-600 hover:bg-teal-100 disabled:opacity-50 disabled:hover:bg-transparent"
         disabled={!nextMonth}
       >
-        <ChevronRight className="h-5 w-5" />
+        <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   );
@@ -651,10 +635,6 @@ const PatientForm = () => {
   const watchUsoAppGlicemia = form.watch("usoAppGlicemia");
   const watchAuxilio = form.watch("auxilio");
 
-  function Pieces(formatted: string) {
-    throw new Error("Function not implemented.");
-  }
-
   return (
     <>
       <Card className="max-w-5xl mx-auto my-8 shadow-md rounded-lg border border-gray-100">
@@ -819,7 +799,7 @@ const PatientForm = () => {
                                   : <span>Escolha uma data</span>}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
+                            <PopoverContent className="w-[280px] p-0">
                               <Calendar
                                 mode="single"
                                 selected={field.value ? parseISO(field.value) : undefined}
@@ -829,6 +809,7 @@ const PatientForm = () => {
                                 components={{
                                   Caption: CustomHeader,
                                 }}
+                                className="rounded-md border border-teal-200"
                                 initialFocus
                               />
                             </PopoverContent>
@@ -988,7 +969,7 @@ const PatientForm = () => {
                           </FormControl>
                           <FormMessage />
                         </FormItem>
-                      )}
+                    )}
                     />
                   )}
                   <FormField
@@ -1015,7 +996,7 @@ const PatientForm = () => {
                                   : <span>Escolha uma data</span>}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
+                            <PopoverContent className="w-[280px] p-0">
                               <Calendar
                                 mode="single"
                                 selected={field.value ? parseISO(field.value) : undefined}
@@ -1025,6 +1006,7 @@ const PatientForm = () => {
                                 components={{
                                   Caption: CustomHeader,
                                 }}
+                                className="rounded-md border border-teal-200"
                                 initialFocus
                               />
                             </PopoverContent>
@@ -1729,7 +1711,7 @@ const PatientForm = () => {
                                   : <span>Escolha uma data</span>}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
+                            <PopoverContent className="w-[280px] p-0">
                               <Calendar
                                 mode="single"
                                 selected={field.value ? parseISO(field.value) : undefined}
@@ -1739,6 +1721,7 @@ const PatientForm = () => {
                                 components={{
                                   Caption: CustomHeader,
                                 }}
+                                className="rounded-md border border-teal-200"
                                 initialFocus
                               />
                             </PopoverContent>
@@ -1852,7 +1835,7 @@ const PatientForm = () => {
                                   : <span>Escolha uma data</span>}
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0">
+                            <PopoverContent className="w-[280px] p-0">
                               <Calendar
                                 mode="single"
                                 selected={field.value ? parseISO(field.value) : undefined}
@@ -1862,6 +1845,7 @@ const PatientForm = () => {
                                 components={{
                                   Caption: CustomHeader,
                                 }}
+                                className="rounded-md border border-teal-200"
                                 initialFocus
                               />
                             </PopoverContent>
