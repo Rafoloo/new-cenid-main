@@ -610,7 +610,7 @@ const PatientForm = () => {
   useEffect(() => {
     if (showSuccessDialog) {
       const timer = setTimeout(() => {
-        router.push("/pacientes");
+        router.push("/dashboard");
       }, 3000);
       return () => clearTimeout(timer);
     }
