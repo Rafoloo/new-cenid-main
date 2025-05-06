@@ -256,13 +256,13 @@ const Dashboard = () => {
     const counts = {
       DM1: 0,
       DM2: 0,
-      LADA: 0,
+      OUTROS: 0,
     };
 
     patients.forEach((patient) => {
       if (patient.diagnostico === "DM1") counts.DM1++;
       else if (patient.diagnostico === "DM2") counts.DM2++;
-      else if (patient.diagnostico === "LADA") counts.LADA++;
+      else if (patient.diagnostico === "OUTROS") counts.OUTROS++;
     });
 
     return counts;
@@ -273,7 +273,7 @@ const Dashboard = () => {
   const diagnosticData: DiagnosticData[] = [
     { label: "DM1", value: diagnosticCounts.DM1, color: "#1E88E5" },
     { label: "DM2", value: diagnosticCounts.DM2, color: "#43A047" },
-    { label: "LADA", value: diagnosticCounts.LADA, color: "#FBC02D" },
+    { label: "OUTROS", value: diagnosticCounts.OUTROS, color: "#FBC02D" },
   ];
 
   const filteredPatients = useMemo(() => {
@@ -411,9 +411,9 @@ const Dashboard = () => {
           className="bg-white border-l-4 border-teal-500 rounded-xl"
         />
         <StatCard
-          title="LADA"
+          title="OUTROS"
           value={diagnosticData[2].value}
-          description="Pacientes com LADA"
+          description="Pacientes com outros diagnósticos"
           icon={<PieChart className="h-5 w-5 text-teal-600" />}
           className="bg-white border-l-4 border-teal-300 rounded-xl"
         />

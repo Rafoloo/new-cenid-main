@@ -384,7 +384,6 @@ const PatientSchema = z
       .min(1, "O número de semanas de gestação deve ser maior que 0")
       .optional(),
     tempoPosParto: z.string().optional(),
-    anexar: z.any().optional(),
     cep: z.string().min(1, "O CEP deve ser preenchido"),
     complemento: z.string().optional(),
     bairro: z.string().min(1, "O bairro deve ser preenchido"),
@@ -587,7 +586,6 @@ const PatientForm = () => {
       telefoneResponsavel: "",
       ocupacaoResponsavel: "",
       dataNascimentoResponsavel: "",
-      anexar: undefined,
       auxilio: "",
       outrosAuxilios: "",
       possuiCelularComAcessoInternet: false,
@@ -1986,7 +1984,7 @@ const PatientForm = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
+                  {/* <FormField
                     control={form.control}
                     name="anexar"
                     render={({ field }) => (
@@ -2009,8 +2007,8 @@ const PatientForm = () => {
                         <FormMessage />
                       </FormItem>
                     )}
-                  />
-                </div>
+                  /> */}
+                </div> 
               </section>
 
               {/* Botão de Envio */}
