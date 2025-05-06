@@ -24,16 +24,11 @@ interface SidebarProps {
 export function Sidebar({ className, onCollapseChange }: SidebarProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-
 
   const handleCollapse = () => {
-    setIsCollapsed((prev) => {
-      const newState = !prev;
-      onCollapseChange(newState);
-      return newState;
-    });
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    onCollapseChange(newState);
   };
 
   return (
@@ -41,7 +36,6 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
       className={cn(
         "bg-gradient-to-b from-teal-700 to-teal-900 text-white font-sans h-screen flex flex-col shadow-lg transition-all duration-300 ease-in-out",
         isCollapsed ? "w-16" : "w-72",
-        isVisible ? "translate-x-0" : "-translate-x-full",
         "fixed top-0 left-0 z-50",
         className
       )}
@@ -64,7 +58,6 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
       {/* Itens */}
       <ScrollArea className="flex-1 px-3 py-4">
         <nav className="space-y-2">
-          {/* Dashboard primeiro */}
           <Button
             asChild
             variant="ghost"
@@ -80,7 +73,6 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
             </Link>
           </Button>
 
-          {/* Cadastro */}
           <Button
             asChild
             variant="ghost"
@@ -96,7 +88,6 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
             </Link>
           </Button>
 
-          {/* Dashboard primeiro */}
           <Button
             asChild
             variant="ghost"
@@ -123,10 +114,9 @@ export function Sidebar({ className, onCollapseChange }: SidebarProps) {
           >
             <Link href="/calculadora" className="flex items-center space-x-3">
               <Calculator className="h-5 w-5" />
-              {!isCollapsed && <span className="text-base">Iniciar Consulta</span>}
+              {!isCollapsed && <span className="text-base">Calculadora</span>}
             </Link>
           </Button>
-
         </nav>
       </ScrollArea>
 

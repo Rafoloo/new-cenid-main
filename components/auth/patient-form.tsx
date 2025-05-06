@@ -51,6 +51,20 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+interface ViaCEPResponse {
+  cep: string;
+  logradouro: string;
+  complemento: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  ibge: string;
+  gia: string;
+  ddd: string;
+  siafi: string;
+  erro?: boolean;
+}
+
 // Função para obter a data local como string no formato "yyyy-MM-dd"
 const getLocalDateString = (date: Date): string => {
   const year = date.getFullYear();
@@ -90,7 +104,16 @@ const formatRG = (value: string): string => {
   return cleaned;
 };
 
-// Componente personalizado para o cabeçalho do calendário
+const formatCEP = (value: string): string => {
+  const cleaned = value.replace(/\D/g, "").slice(0, 8);
+  const match = cleaned.match(/^(\d{0,5})(\d{0,3})$/);
+  if (match) {
+    const [, p1, p2] = match;
+    return `${p1}${p2 ? "-" + p2 : ""}`;
+  }
+  return value;
+};
+
 const CustomHeader = (props: CaptionProps) => {
   const { goToMonth, nextMonth, previousMonth } = useNavigation();
   const { displayMonth } = props;
@@ -362,6 +385,11 @@ const PatientSchema = z
       .optional(),
     tempoPosParto: z.string().optional(),
     anexar: z.any().optional(),
+    cep: z.string().min(1, "O CEP deve ser preenchido"),
+    complemento: z.string().optional(),
+    bairro: z.string().min(1, "O bairro deve ser preenchido"),
+    cidade: z.string().min(1, "A cidade deve ser preenchida"),
+    estado: z.string().min(1, "O estado deve ser preenchido"),
   })
   .refine(
     (data) =>
@@ -500,7 +528,6 @@ const PatientForm = () => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const router = useRouter();
 
-  // Estados para controlar máscaras
   const [cpf, setCpf] = useState("");
   const [telefone, setTelefone] = useState("");
   const [cartaoSus, setCartaoSus] = useState("");
@@ -565,6 +592,11 @@ const PatientForm = () => {
       outrosAuxilios: "",
       possuiCelularComAcessoInternet: false,
       dataCadastro: getLocalDateString(new Date()),
+      cep: "",
+      complemento: "",
+      bairro: "",
+      cidade: "",
+      estado: "",
     },
   });
 
@@ -861,15 +893,59 @@ const PatientForm = () => {
               <section className="space-y-4">
                 <h2 className="text-lg font-medium text-teal-700">Endereço</h2>
                 <Separator className="bg-teal-200" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="cep"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>CEP</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="00000-000"
+                            value={field.value}
+                            onChange={async (e) => {
+                              const formatted = formatCEP(e.target.value);
+                              field.onChange(formatted);
+                              
+                              if (formatted.length === 9) {
+                                try {
+                                  const response = await fetch(`https://viacep.com.br/ws/${formatted.replace("-", "")}/json/`);
+                                  const data: ViaCEPResponse = await response.json();
+                                  
+                                  if (!data.erro) {
+                                    form.setValue("endereco", data.logradouro);
+                                    form.setValue("bairro", data.bairro);
+                                    form.setValue("cidade", data.localidade);
+                                    form.setValue("estado", data.uf);
+                                  } else {
+                                    toast.error("CEP não encontrado");
+                                  }
+                                } catch (error) {
+                                  toast.error("Erro ao buscar CEP");
+                                }
+                              }
+                            }}
+                            maxLength={9}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={form.control}
                     name="endereco"
                     render={({ field }) => (
-                      <FormItem className="md:col-span-2">
+                      <FormItem className="md:col-span-4">
                         <FormLabel>Endereço</FormLabel>
                         <FormControl>
-                          <Input placeholder="Rua, Avenida, etc." {...field} />
+                          <Input 
+                            placeholder="Rua, Avenida, etc." 
+                            {...field} 
+                            readOnly
+                            className="bg-gray-50 cursor-not-allowed"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -879,7 +955,7 @@ const PatientForm = () => {
                     control={form.control}
                     name="numero"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="md:col-span-2">
                         <FormLabel>Número</FormLabel>
                         <FormControl>
                           <Input placeholder="Número" {...field} />
@@ -890,12 +966,67 @@ const PatientForm = () => {
                   />
                   <FormField
                     control={form.control}
-                    name="municipio"
+                    name="complemento"
                     render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel>Município</FormLabel>
+                      <FormItem className="md:col-span-4">
+                        <FormLabel>Complemento</FormLabel>
                         <FormControl>
-                          <Input placeholder="Digite o município" {...field} />
+                          <Input placeholder="Apartamento, bloco, etc." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bairro"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Bairro</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Bairro" 
+                            {...field} 
+                            readOnly
+                            className="bg-gray-50 cursor-not-allowed"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="cidade"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Cidade</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Cidade" 
+                            {...field} 
+                            readOnly
+                            className="bg-gray-50 cursor-not-allowed"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="estado"
+                    render={({ field }) => (
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="UF" 
+                            {...field} 
+                            readOnly
+                            className="bg-gray-50 cursor-not-allowed"
+                            maxLength={2}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

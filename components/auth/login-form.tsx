@@ -40,28 +40,35 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
+    
+    try {
+      startTransition(async () => {
+        const data = await login(values);
+        
+        if (data?.twoFactor) {
+          setShowTwoFactor(true);
+          return;
+        }
 
-    startTransition(() => {
-      login(values)
-        .then((data) => {
-          if (data?.error) {
-            setError(data.error);
-          }
+        if (data?.error) {
+          setError(data.error);
+          return;
+        }
 
-          if (data?.success) {
-            form.reset();
-            setSuccess(data.success);
-          }
-
-          if (data?.twoFactor) {
-            setShowTwoFactor(true);
-          }
-        })
-        .catch(() => setError("Algo deu errado. Tente novamente."));
-    });
+        if (data?.success) {
+          form.reset();
+          setSuccess(data.success);
+        }
+      });
+    } catch (error) {
+      // Only set error if it's a real error, not a redirect or expected response
+      if (error instanceof Error) {
+        setError("Algo deu errado. Tente novamente.");
+      }
+    }
   };
 
   return (
