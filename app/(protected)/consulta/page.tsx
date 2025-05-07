@@ -793,7 +793,7 @@ const ConsultaForm = () => {
               <ArrowLeft className="h-5 w-5 text-teal-800" />
             </Button>
             <CardTitle className="text-xl font-semibold text-teal-800">
-              Cadastro de Consulta
+              Agendamento de Consulta
             </CardTitle>
           </div>
         </CardHeader>
@@ -900,7 +900,7 @@ const ConsultaForm = () => {
                         </FormItem>
                       )}
                     />
-                    <FormField
+                    {/* <FormField
                       control={form.control}
                       name="horaConsulta"
                       render={({ field }) => (
@@ -963,7 +963,7 @@ const ConsultaForm = () => {
                           <FormMessage />
                         </FormItem>
                       )}
-                    />
+                    /> */}
                     <FormField
                       control={form.control}
                       name="tipoConsulta"
@@ -1068,7 +1068,7 @@ const ConsultaForm = () => {
                   </div>
                 </section>
 
-                <section className="space-y-4">
+                {/* <section className="space-y-4">
                   <h2 className="text-lg font-medium text-teal-700">Status e Prioridade</h2>
                   <Separator className="bg-teal-200" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1178,7 +1178,7 @@ const ConsultaForm = () => {
                       )}
                     />
                   </div>
-                </section>
+                </section> */}
 
                 <section className="space-y-4">
                   <h2 className="text-lg font-medium text-teal-700">Controle de Diabetes</h2>
@@ -1264,7 +1264,7 @@ const ConsultaForm = () => {
                   </div>
                 </section>
 
-                <section className="space-y-4">
+                {/* <section className="space-y-4">
                   <h2 className="text-lg font-medium text-teal-700">Acompanhamento</h2>
                   <Separator className="bg-teal-200" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1341,9 +1341,9 @@ const ConsultaForm = () => {
                       )}
                     </div>
                   </div>
-                </section>
+                </section> */}
 
-                <section className="space-y-4">
+                {/* <section className="space-y-4">
                   <h2 className="text-lg font-medium text-teal-700">Logística</h2>
                   <Separator className="bg-teal-200" />
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1410,7 +1410,7 @@ const ConsultaForm = () => {
                       )}
                     </div>
                   </div>
-                </section>
+                </section> */}
 
                 <section className="space-y-4">
                   <h2 className="text-lg font-medium text-teal-700">Notificações</h2>
