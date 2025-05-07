@@ -36,7 +36,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
-type Specialty = "Medicina" | "Psicologia" | "Educação Física" | "Nutrição" | "Enfermagem"
+type Specialty = "Medicina" | "Psicologia" | "Educação Física" | "Nutrição" | "Farmácia"
 
 const getLocalDateString = (date: Date) => {
   const year = date.getFullYear()
@@ -64,7 +64,7 @@ const CustomHeader = (props: { displayMonth: any }) => {
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
-      <span className="text-teal-800 text-sm font-medium text-gray-800">
+      <span className="text-teal-800 text-sm font-medium">
         {format(displayMonth, "MMMM yyyy", { locale: ptBR })}
       </span>
       <button
@@ -346,15 +346,15 @@ const ConsultaForm = () => {
 
             <button
               type="button"
-              onClick={() => handleSpecialtyClick("Enfermagem")}
+              onClick={() => handleSpecialtyClick("Farmácia")}
               className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                selectedSpecialty === "Enfermagem"
+                selectedSpecialty === "Farmácia"
                   ? "border-2 border-teal-500 bg-teal-50"
                   : "border-teal-200 hover:border-teal-500 hover:border-2"
               }`}
             >
               <Stethoscope className="h-8 w-8 mb-2 text-teal-600" />
-              <span className="text-teal-800">Enfermagem</span>
+              <span className="text-teal-800">Farmácia</span>
             </button>
           </div>
           {form.formState.errors.especialidade && (
