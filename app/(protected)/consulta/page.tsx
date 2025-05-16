@@ -81,10 +81,10 @@ import FormularioMedicina from "@/components/auth/medicina-form";
 import FormularioPsicologia from "@/components/auth/psicologia-form";
 import FormularioEducacaoFisica from "@/components/auth/fisica-form";
 import FormularioNutricao from "@/components/auth/nutricao-form";
-import FormularioEnfermagem from "@/components/auth/enfermagem-form";
+import FormularioFarmacia from "@/components/auth/farmacia-form";
 
 // Tipos exportados para uso nos formulários de especialidade
-export type Specialty = "Medicina" | "Psicologia" | "Educação Física" | "Nutrição" | "Enfermagem";
+export type Specialty = "Medicina" | "Psicologia" | "Educação Física" | "Nutrição" | "Farmacia";
 
 export interface ConsultaFormValues {
   patientId: string;
@@ -275,7 +275,7 @@ const predefinedProfessionals = {
   Psicologia: ["Psi. Márcia Oliveira", "Psi. Thiago Mendes", "Psi. Júlia Costa"],
   "Educação Física": ["Prof. Paulo Martins", "Profa. Camila Santos", "Prof. Gustavo Lima"],
   Nutrição: ["Nut. Fernanda Pereira", "Nut. Daniel Almeida", "Nut. Roberta Dias"],
-  Enfermagem: ["Enf. Maria Oliveira", "Enf. João Santos", "Enf. Clara Mendes"],
+  Farmacia: ["Enf. Maria Oliveira", "Enf. João Santos", "Enf. Clara Mendes"],
 };
 
 // Tipos de consulta por especialidade
@@ -284,7 +284,7 @@ const consultTypesBySpecialty = {
   Psicologia: ["PrimeiraConsulta", "RetornoRegular", "Psicologica"],
   "Educação Física": ["PrimeiraConsulta", "RetornoRegular"],
   Nutrição: ["PrimeiraConsulta", "RetornoRegular", "Nutricional"],
-  Enfermagem: ["PrimeiraConsulta", "RetornoRegular"],
+  Farmacia: ["PrimeiraConsulta", "RetornoRegular"],
 };
 
 // Componente de cabeçalho personalizado para o calendário
@@ -756,8 +756,8 @@ const ConsultaForm = () => {
         return <FormularioEducacaoFisica  />;
       case "Nutrição":
         return <FormularioNutricao />;
-      case "Enfermagem":
-        return <FormularioEnfermagem  />;
+      case "Farmacia":
+        return <FormularioFarmacia  />;
       default:
         return null;
     }
@@ -824,7 +824,7 @@ const ConsultaForm = () => {
                       { id: "Psicologia", label: "Psicologia", icon: Brain },
                       { id: "Educação Física", label: "Educação Física", icon: Dumbbell },
                       { id: "Nutrição", label: "Nutrição", icon: Apple },
-                      { id: "Enfermagem", label: "Enfermagem", icon: Stethoscope },
+                      { id: "Farmacia", label: "Farmacia", icon: Stethoscope },
                     ].map((item) => (
                       <Button
                         key={item.id}
