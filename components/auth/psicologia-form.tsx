@@ -1,11 +1,13 @@
 "use client"
 
+import type React from "react"
+
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { CalendarIcon } from "lucide-react"
+import { Activity, AlertCircle, Brain, CalendarIcon, HeartPulse, ClipboardList } from "lucide-react"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -15,13 +17,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const PsicologiaSchema = z.object({
   nome: z.string().min(1, "O nome do paciente deve ser preenchido"),
   dataAvaliacao: z.string().min(1, "A data da avaliação deve ser selecionada"),
   respostasQualidadeVida: z.array(z.string().optional()).length(33),
   respostasHADS: z.array(z.string().optional()).length(14),
+  respostasAnsiedade: z.array(z.number().optional()).length(7),
+  respostasDepressao: z.array(z.number().optional()).length(9),
+  respostasAutocuidado: z.array(z.number().optional()).length(15),
   hipoteseDiagnostica: z.string().optional(),
   condutaClinica: z.string().optional(),
 })
@@ -34,6 +39,9 @@ export default function FormularioPsicologia() {
     defaultValues: {
       respostasQualidadeVida: Array(33).fill(""),
       respostasHADS: Array(14).fill(""),
+      respostasAnsiedade: Array(7).fill(""),
+      respostasDepressao: Array(9).fill(""),
+      respostasAutocuidado: Array(15).fill(""),
     },
   })
 
@@ -41,104 +49,103 @@ export default function FormularioPsicologia() {
     console.log(data)
   }
 
-  const questoesQualidadeVida = [
-    "Ter diabetes dificulta minhas relações sociais (amigos, colegas, parceiros, etc).",
-    "Sinto-me diferente por ter diabetes.",
-    "Ter que aplicar insulina é um problema diário para mim.",
-    "Ter diabetes limita minha vida social e de lazer (comer fora de casa, comemorações, viagens, etc).",
-    "Minha vida mudou por eu ter diabetes.",
-    "Ter diabetes dificulta as relações com minha família.",
-    "Sinto-me limitado(a) no trabalho ou escola por ter diabetes.",
-    "Tenho alguma(s) complicação(ções) do diabetes que piora(m) a minha qualidade de vida porque me limita(m) fisicamente.",
-    "O dia a dia com diabetes me representa um estresse a mais.",
-    "Fico preocupado(a) que os outros saibam que tenho diabetes.",
-    "Minha vida sexual está limitada por eu ter diabetes.",
-    "Tendo diabetes posso levar uma vida normal.",
-    "Estou satisfeito(a) com o envolvimento que tenho no dia a dia no autocuidado do meu diabetes.",
-    "O nível de formação/conhecimento que tenho sobre meu diabetes me ajuda a ter um bom controle.",
-    "O conhecimento que tenho em contagem de carboidratos proporciona flexibilidade na minha alimentação.",
-    "Estou satisfeito(a) com a forma que levo meu diabetes.",
-    "Estou motivado(a) no autocuidado do meu diabetes.",
-    "Ajusto a dose de insulina de acordo com a minha alimentação para ter um bom controle.",
-    "Estou satisfeito(a) com o tratamento farmacológico/insulina que sigo, porque me facilita o controle do diabetes.",
-    "Estou satistfeito(a) com meu atual controle glicêmico (hemoglobina glicada/tempo no alvo).",
-    "O controle do meu diabetes está integrado em minha vida cotidiana com normalidade.",
-    "Considero que tenho flexibilidade e liberdade na minha alimentação embora eu tenha diabetes.",
-    "É muito difícil fazer os controles (glicemias) diariamente.",
-    "Descanso bem e meu sono noturno é bom.",
-    "Estou bem fisicamente.",
-    "Estou bem psicologicamente.",
-    "Tenho outra(s) doença(s) em consequência do diabetes que piora(m) minha qualidade de vida.",
-    "Estou satisfeito(a) com o tempo que dedico para fazer atividade física.",
-    "Considero que, em geral, minha qualidade de vida é boa.",
-    "Tenho medo de ter hipoglicemias (baixas de açucar no sangue).",
-    "Com frequência me preocupa ter uma hipoglicemia.",
-    "Fico preocupado(a) quando tenho glicemia alta.",
-    "Com frequência fico preocupado(a) em ter futuras complicações pelo diabetes.",
+  //calcular ansiedade
+  const calcularScoreAnsiedade = (respostas: string[]) => {
+    return respostas.map((resposta) => Number.parseInt(resposta || "0")).reduce((total, valor) => total + valor, 0)
+  }
+
+  const classificarAnsiedade = (score: number) => {
+    if (score < 5) return "Ansiedade Mínima"
+    if (score < 10) return "Ansiedade Leve"
+    if (score < 15) return "Ansiedade Moderada"
+    return "Ansiedade Grave"
+  }
+
+  //calcular depressão
+  const calcularScoreDepressao = (respostas: string[]) => {
+    return respostas.map((resposta) => Number.parseInt(resposta || "0")).reduce((total, valor) => total + valor, 0)
+  }
+
+  const classificarDepressao = (score: number) => {
+    if (score < 5) return "Ausente"
+    if (score < 10) return "Depressão Leve"
+    if (score < 15) return "Depressão Moderada"
+    if (score < 20) return "Depressão Moderadamente Severa"
+    return "Depressão Severa"
+  }
+
+  //calcular autocuidado
+  const calcularScoreAutocuidado = (respostas: string[]) => {
+    return respostas.map((resposta) => Number.parseInt(resposta || "0")).reduce((total, valor) => total + valor, 0)
+  }
+
+  const classificarAutocuidado = (score: number) => {
+    const percentual = (score / 75) * 100
+    if (percentual < 50) return "Inadequado"
+    if (percentual < 70) return "Regular"
+    if (percentual < 85) return "Bom"
+    return "Excelente"
+  }
+
+  interface StatCardProps {
+    title: string
+    value: string | number
+    description?: string
+    icon: React.ReactNode
+    className?: string
+  }
+
+  const StatCard = ({ title, value, description, icon, className }: StatCardProps) => (
+    <Card className={`shadow-lg hover:shadow-xl transition-shadow duration-300 ${className}`}>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+      </CardContent>
+    </Card>
+  )
+
+  const questoesAnsiedade = [
+    "Sentir-se nervoso/a, ansioso/a ou muito tenso/a.",
+    "Não ser capaz de impedir ou de controlar as preocupações.",
+    "Preocupar-se muito com diversas coisas.",
+    "Dificuldade para relaxar.",
+    "Ficar tão agitado/a que se torna difícil permanecer parado.",
+    "Ficar facilmente aborrecido/a ou irritado/a.",
+    "Sentir medo como se algo horrível fosse acontecer",
   ]
 
-  const questoesHADS = [
-    {
-      pergunta: "Sinto-me tenso(a) ou nervoso(a)",
-      opcoes: ["Quase sempre", "Muitas vezes", "Por vezes", "Nunca"],
-    },
-    {
-      pergunta: "Ainda sinto prazer nas coisas de que costumava gostar",
-      opcoes: ["Tanto como antes", "Não tanto como agora", "Só um pouco", "Quase nada"],
-    },
-    {
-      pergunta: "Tenho uma sensação de medo, como se algo terrível estivesse para acontecer",
-      opcoes: ["Sim e muito forte", "Sim, mas não muito forte", "Um pouco, mas não me aflige", "De modo algum"],
-    },
-    {
-      pergunta: "Sou capaz de rir e ver o lado divertido das coisas",
-      opcoes: ["Tanto como antes", "Não tanto como antes", "Muito menos agora", "Nunca"],
-    },
-    {
-      pergunta: "Tenho a cabeça cheia de preocupações",
-      opcoes: ["A maior parte do tempo", "Muitas vezes", "Por vezes", "Quase nunca"],
-    },
-    {
-      pergunta: "Sinto-me animado(a)",
-      opcoes: ["Nunca", "Poucas vezes", "De vez em quando", "Quase sempre"],
-    },
-    {
-      pergunta: "Sou capaz de estar descontraidamente sentado(a) e sentir-me relaxado(a)",
-      opcoes: ["Quase sempre", "Muitas vezes", "Por vezes", "Nunca"],
-    },
-    {
-      pergunta: "Sinto-me mais lento(a), como se fizesse as coisas mais devagar",
-      opcoes: ["Quase sempre", "Muitas vezes", "Por vezes", "Nunca"],
-    },
-    {
-      pergunta: "Fico de tal forma apreensivo(a)/com medo, que até sinto um aperto no estômago",
-      opcoes: ["Nunca", "Por vezes", "Muitas vezes", "Quase sempre"],
-    },
-    {
-      pergunta: "Perdi o interesse em cuidar do meu aspecto físico",
-      opcoes: [
-        "Completamente",
-        "Não dou a atenção que devia",
-        "Talvez cuide menos que antes",
-        "Tenho o mesmo interesse de sempre",
-      ],
-    },
-    {
-      pergunta: "Sinto-me de tal forma inquieto(a) que não consigo estar parado(a)",
-      opcoes: ["Muito", "Bastante", "Não muito", "Nada"],
-    },
-    {
-      pergunta: "Penso com prazer nas coisas que podem acontecer no futuro",
-      opcoes: ["Tanto como antes", "Não tanto como antes", "Bastante menos agora", "Quase nunca"],
-    },
-    {
-      pergunta: "De repente, tenho sensações de pânico",
-      opcoes: ["Muitas vezes", "Bastante vezes", "Por vezes", "Nunca"],
-    },
-    {
-      pergunta: "Sou capaz de apreciar um bom livro ou um programa de rádio ou televisão",
-      opcoes: ["Muitas vezes", "De vez em quando", "Poucas vezes", "Quase nunca"],
-    },
+  const questoesDepressao = [
+    "Pouco interesse ou pouco prazer em fazer as coisas",
+    "Se sentir “para baixo”, deprimido/a ou sem perspectiva",
+    "Dificuldade para pegar no sono ou permanecer dormindo, ou dormir mais do que de costume",
+    "Se sentir cansado/a ou com pouca energia",
+    "Falta de apetite ou comendo demais",
+    "Se sentir mal consigo mesmo/a — ou achar que você é um fracasso ou que decepcionou sua família ou você mesmo/a",
+    "Dificuldade para se concentrar nas coisas, como ler ou ver assitir televisão",
+    "Lentidão para se movimentar ou falar, a ponto das outras pessoas perceberem? Ou o oposto – estar tão agitado/a ou irrequieto/a que você fica andando de um lado para o outro muito mais do que de costume",
+    "Pensar em se ferir de alguma maneira ou que seria melhor estar morto/a",
+  ]
+
+  const questoesAutocuidado = [
+    "Verifica a glicose no sangue com monitor (glicosímetro ou CGM)",
+    "Anota os resultados de glicose no sangue quando verifica com o monitor",
+    "Verifica cetonas no sangue ou na urina quando o nível de glicose está alto",
+    "Usa a dose correta de insulina ou dos remédios para diabetes",
+    "Usa a insulina ou os remédios para diabetes na hora certa",
+    "Come as porções corretas de comida",
+    "Come as refeições e lanches na hora certa",
+    "Anota o que come, principalmente os carboidratos",
+    "Lê os rótulos dos alimentos",
+    "Carrega carboidrato para, em caso de emergência, tratar a glicose baixa no sangue",
+    "Quando a glicose no sangue está baixa, trata somente com a quantidade de carboidratos recomendada",
+    "Comparece às consultas marcadas",
+    "Carrega algum tipo de identificação que comprove o diabetes (por exemplo: cartão, pulseira, colar)",
+    "Faz exercícios físico",
+    "Você modifica a dose de insulina baseado nos valores da glicose, comida e/ou exercícios",
   ]
 
   return (
@@ -211,38 +218,42 @@ export default function FormularioPsicologia() {
         {/* Aviso */}
         <div className="bg-teal-50 p-4 rounded-md border border-teal-200">
           <p className="text-sm text-teal-800">
-            A avaliação dos questionários de "Ansiedade e Depressão" e da análise da "Qualidade de Vida" deverá ser
-            realizada com intervalo mínimo de 4 meses e máximo de 12 meses.
+            A seguir, você encontrará dois breves questionários utilizados para avaliar sintomas de ansiedade (GAD-7) e
+            depressão (PHQ-9). Eles são instrumentos reconhecidos e servem como apoio na identificação de sinais
+            relacionados à saúde mental. As perguntas se referem ao que você sentiu ou vivenciou{" "}
+            <span className="font-semibold text-teal-900">nas últimas duas semanas.</span> Não há respostas certas ou
+            erradas — apenas indique o que melhor representa como você tem se sentido. Os dados são confidenciais e
+            utilizados apenas para fins de acompanhamento e orientação.
           </p>
         </div>
 
         {/* Percepção de Qualidade de Vida */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-teal-700">PERCEPÇÃO DE QUALIDADE DE VIDA</h3>
+          <h3 className="text-lg font-semibold text-teal-700">
+            Avaliação da Ansiedade (GAD-7) <span className="text-rose-500">» Aplicar a partir dos 6 anos</span>
+          </h3>
           <Separator className="bg-teal-200" />
           <div className="space-y-2">
-            <p className="text-sm text-teal-800">
-              Para as questões abaixo responda como você se sente considerando a escala de 1 a 5
-            </p>
-            <p className="text-sm text-teal-800">
-              1 - discordo totalmente; 2 - discordo; 3 - não concordo nem discordo; 4 - concordo; 5 - concordo
-              totalmente
+            <p className="text-sm text-teal-800 mb-6">
+              Este questionário pretende aferir o seu nível de ansiedade e depressão, avaliando como se tem sentido na
+              última semana. Tenha em consideração que não há respostas certas ou erradas. Por favor, responda todas as
+              perguntas. Não demore muito tempo a pensar nas respostas, a sua reação imediata a cada questão será
+              provavelmente mais correta do que uma resposta ponderada.
             </p>
             <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
               <p className="text-sm text-yellow-800">
-                Os itens 12, 23 e 27 são invertidos para uma interpretação correta, como segue abaixo:
-                <br />1 - concordo totalmente; 2 - concordo; 3 - não concordo e nem discordo; 4 - discordo; 5 - discordo
-                totalmente
+                Para as questões abaixo responda como o paciente se sente considerando a escala de 0 a 3:
+                <br />0 ─ nenhuma vez; 1 ─ Vários dias; 2 ─ Mais da metade dos dias; 3 ─ Todos os dias.
               </p>
             </div>
           </div>
 
           <div className="space-y-4 mt-6">
-            {questoesQualidadeVida.map((questao, index) => (
+            {questoesAnsiedade.map((questao, index) => (
               <FormField
                 key={index}
                 control={form.control}
-                name={`respostasQualidadeVida.${index}`}
+                name={`respostasAnsiedade.${index}`}
                 render={({ field }) => (
                   <FormItem className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 border-b border-teal-100">
                     <div>
@@ -257,7 +268,7 @@ export default function FormularioPsicologia() {
                     </div>
                     <div className="flex justify-end">
                       <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4">
-                        {[1, 2, 3, 4, 5].map((valor) => (
+                        {[0, 1, 2, 3].map((valor) => (
                           <FormItem key={valor} className="flex flex-col items-center space-y-1">
                             <FormControl>
                               <RadioGroupItem value={valor.toString()} id={`q${index}-${valor}`} />
@@ -276,7 +287,189 @@ export default function FormularioPsicologia() {
           </div>
         </div>
 
-        {/* Resultados - Percepção de Qualidade de Vida */}
+        {/* Análise dos resultados da Ansiedade */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-teal-700">Resultados da Avaliação de Ansiedade (GAD-7)</h3>
+          <Separator className="bg-teal-200" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StatCard
+              title="Score de Ansiedade"
+              value={calcularScoreAnsiedade(form.watch("respostasAnsiedade") || [])}
+              description="Pontuação total na escala GAD-7"
+              icon={<AlertCircle className="h-5 w-5 text-teal-600" />}
+              className="bg-white border-l-4 border-teal-500 rounded-xl"
+            />
+
+            <StatCard
+              title="Classificação"
+              value={classificarAnsiedade(calcularScoreAnsiedade(form.watch("respostasAnsiedade") || []))}
+              description="Nível de ansiedade baseado na pontuação"
+              icon={<Activity className="h-5 w-5 text-teal-600" />}
+              className="bg-white border-l-4 border-teal-500 rounded-xl"
+            />
+          </div>
+        </div>
+
+        {/* Percepção de Qualidade de Vida */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-teal-700">
+            Avaliação da Depressão (PHQ-9) <span className="text-rose-500">» Aplicar a partir dos 12 anos</span>
+          </h3>
+          <Separator className="bg-teal-200" />
+          <div className="space-y-2">
+            <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
+              <p className="text-sm text-yellow-800">
+                Para as questões abaixo responda como o paciente se sente considerando a escala de 0 a 3:
+                <br />0 ─ nenhuma vez; 1 ─ Vários dias; 2 ─ Mais da metade dos dias; 3 ─ Todos os dias.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4 mt-6">
+            {questoesDepressao.map((questao, index) => (
+              <FormField
+                key={index}
+                control={form.control}
+                name={`respostasDepressao.${index}`}
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 border-b border-teal-100">
+                    <div>
+                      <FormLabel
+                        className={cn(
+                          "text-sm font-normal",
+                          [11, 22, 26].includes(index) ? "bg-yellow-50 p-2 rounded inline-block" : "",
+                        )}
+                      >
+                        {index + 1}. {questao}
+                      </FormLabel>
+                    </div>
+                    <div className="flex justify-end">
+                      <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex space-x-4">
+                        {[0, 1, 2, 3].map((valor) => (
+                          <FormItem key={valor} className="flex flex-col items-center space-y-1">
+                            <FormControl>
+                              <RadioGroupItem value={valor.toString()} id={`q${index}-${valor}`} />
+                            </FormControl>
+                            <FormLabel htmlFor={`q${index}-${valor}`} className="text-xs font-normal text-teal-700">
+                              {valor}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Resultados da Avaliação de Depressão */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-teal-700">Resultados da Avaliação de Depressão (PHQ-9)</h3>
+          <Separator className="bg-teal-200" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StatCard
+              title="Score de Depressão"
+              value={calcularScoreDepressao(form.watch("respostasDepressao") || [])}
+              description="Pontuação total na escala PHQ-9"
+              icon={<HeartPulse className="h-5 w-5 text-teal-600" />}
+              className="bg-white border-l-4 border-teal-500 rounded-xl"
+            />
+
+            <StatCard
+              title="Classificação"
+              value={classificarDepressao(calcularScoreDepressao(form.watch("respostasDepressao") || []))}
+              description="Nível de depressão baseado na pontuação"
+              icon={<Brain className="h-5 w-5 text-teal-600" />}
+              className="bg-white border-l-4 border-teal-500 rounded-xl"
+            />
+          </div>
+        </div>
+
+        {/* Inventário de Autocuidado */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-teal-700 flex items-center gap-2">
+            <ClipboardList className="h-5 w-5" /> Inventário de Autocuidado em Diabetes (SCI-R)
+          </h3>
+          <Separator className="bg-teal-200" />
+          <div className="space-y-2">
+            <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
+              <p className="text-sm text-yellow-800">
+                Para as questões abaixo responda com que frequência o paciente realiza cada uma das atividades de auto cuidado listadas a baixo, considerando a escala de 1 a 5:
+                <br />1 ─ nunca; 2 ─ raramente; 3 ─ as vezes; 4 ─ geralmente; 5 ─ sempre.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4 mt-6">
+            {questoesAutocuidado.map((questao, index) => (
+              <FormField
+                key={index}
+                control={form.control}
+                name={`respostasAutocuidado.${index}`}
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 border-b border-teal-100">
+                    <div>
+                      <FormLabel className="text-sm font-normal">
+                        {index + 1}. {questao}
+                      </FormLabel>
+                    </div>
+                    <div className="flex justify-end">
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex space-x-4"
+                      >
+                        {[1, 2, 3, 4, 5].map((valor) => (
+                          <FormItem key={valor} className="flex flex-col items-center space-y-1">
+                            <FormControl>
+                              <RadioGroupItem value={valor.toString()} id={`autocuidado-${index}-${valor}`} />
+                            </FormControl>
+                            <FormLabel
+                              htmlFor={`autocuidado-${index}-${valor}`}
+                              className="text-xs font-normal text-teal-700"
+                            >
+                              {valor}
+                            </FormLabel>
+                          </FormItem>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Resultados do Autocuidado */}
+        <div className="space-y-4 mt-8">
+          <h3 className="text-lg font-semibold text-teal-700">Resultados do Inventário de Autocuidado</h3>
+          <Separator className="bg-teal-200" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <StatCard
+              title="Pontuação Total"
+              value={calcularScoreAutocuidado(form.watch("respostasAutocuidado") || [])}
+              description="Pontuação total no inventário de autocuidado"
+              icon={<ClipboardList className="h-5 w-5 text-teal-600" />}
+              className="bg-white border-l-4 border-teal-500 rounded-xl"
+            />
+
+            <StatCard
+              title="Classificação"
+              value={classificarAutocuidado(calcularScoreAutocuidado(form.watch("respostasAutocuidado") || []))}
+              description="Nível de autocuidado baseado na pontuação"
+              icon={<Activity className="h-5 w-5 text-teal-600" />}
+              className="bg-white border-l-4 border-teal-500 rounded-xl"
+            />
+          </div>
+        </div>
+
+        {/* Resultados - Percepção de Qualidade de Vida
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-teal-700">RESULTADOS - PERCEPÇÃO DE QUALIDADE DE VIDA</h3>
           <Separator className="bg-teal-200" />
@@ -326,9 +519,9 @@ export default function FormularioPsicologia() {
               </TableRow>
             </TableBody>
           </Table>
-        </div>
+        </div> */}
 
-        {/* Escala de Ansiedade e Depressão */}
+        {/* Escala de Ansiedade e Depressão
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-teal-700">Escala de Ansiedade e Depressão (HADS)</h3>
           <Separator className="bg-teal-200" />
@@ -369,49 +562,7 @@ export default function FormularioPsicologia() {
               />
             ))}
           </div>
-        </div>
-
-        {/* Análise dos resultados */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-teal-700">
-            Análise dos resultados do Escala de Ansiedade e Depressão (HADS)
-          </h3>
-          <Separator className="bg-teal-200" />
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-teal-800">Sintomas</TableHead>
-                <TableHead className="text-teal-800">Pontuação</TableHead>
-                <TableHead className="text-teal-800">Sugestão diagnóstica</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Ansiedade</TableCell>
-                <TableCell></TableCell>
-                <TableCell>
-                  0-7 pontos: improvável
-                  <br />
-                  8-11 pontos: possível - (questionável ou duvidosa)
-                  <br />
-                  12-21 pontos: provável
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Depressão</TableCell>
-                <TableCell></TableCell>
-                <TableCell>
-                  0-7 pontos: improvável
-                  <br />
-                  8-11 pontos: possível - (questionável ou duvidosa)
-                  <br />
-                  12-21 pontos: provável
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+        </div> */}
 
         {/* Hipótese Diagnóstica */}
         <div className="space-y-4">

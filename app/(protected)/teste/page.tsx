@@ -21,7 +21,7 @@ export default function Home() {
       <div className="max-w-5xl mx-auto p-4">
         <Card className="shadow-lg rounded-lg border border-gray-200 mb-6">
           <CardHeader className="bg-teal-50">
-            <CardTitle className="text-2xl font-bold text-teal-800">Cadastro de Consulta</CardTitle>
+            <CardTitle className="text-2xl font-bold text-teal-800">Iniciar Consulta</CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="mb-6">
