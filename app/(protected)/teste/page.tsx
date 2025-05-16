@@ -1,12 +1,13 @@
 "use client"
 
 import { useState } from "react"
-import { Activity, Brain, Dumbbell, Apple, Stethoscope } from "lucide-react"
+import { Activity, Brain, Dumbbell, Apple, Pill, FlaskConical } from "lucide-react"
 import FormularioMedicina from "@/components/auth/medicina-form";
 import FormularioPsicologia from "@/components/auth/psicologia-form";
 import FormularioEducacaoFisica from "@/components/auth/fisica-form";
 import FormularioNutricao from "@/components/auth/nutricao-form";
-import FormularioEnfermagem from "@/components/auth/enfermagem-form";
+import FormularioFarmacia from "@/components/auth/farmacia-form";
+import FormularioBioquimica from "@/components/auth/bioquimica-form"; // Import do formulário de Química
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -28,6 +29,7 @@ export default function Home() {
               <h2 className="text-lg font-semibold text-teal-700 mb-4">Selecione a Especialidade*</h2>
 
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {/* Botões existentes */}
                 <button
                   onClick={() => selecionarEspecialidade("medicina")}
                   className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
@@ -73,15 +75,27 @@ export default function Home() {
                   <span className="text-teal-800">Nutrição</span>
                 </button>
                 <button
-                  onClick={() => selecionarEspecialidade("enfermagem")}
+                  onClick={() => selecionarEspecialidade("farmacia")}
                   className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
-                    especialidadeSelecionada === "enfermagem"
+                    especialidadeSelecionada === "farmacia"
                       ? "border-2 border-teal-500 bg-teal-50"
                       : "border-teal-200 hover:border-teal-500 hover:border-2"
                   }`}
                 >
-                  <Stethoscope className="h-8 w-8 mb-2 text-teal-600" />
-                  <span className="text-teal-800">Enfermagem</span>
+                  <Pill className="h-8 w-8 mb-2 text-teal-600" />
+                  <span className="text-teal-800">Farmácia</span>
+                </button>
+                {/* Novo botão para Química */}
+                <button
+                  onClick={() => selecionarEspecialidade("bioquimica")}
+                  className={`flex flex-col items-center justify-center h-24 border rounded-md py-4 px-2 transition-all ${
+                    especialidadeSelecionada === "bioquimica"
+                      ? "border-2 border-teal-500 bg-teal-50"
+                      : "border-teal-200 hover:border-teal-500 hover:border-2"
+                  }`}
+                >
+                  <FlaskConical className="h-8 w-8 mb-2 text-teal-600" />
+                  <span className="text-teal-800">Bioquímica</span>
                 </button>
               </div>
             </div>
@@ -101,7 +115,9 @@ export default function Home() {
                       ? "Educação Física"
                       : especialidadeSelecionada === "nutricao"
                         ? "Nutrição"
-                        : "Enfermagem"}
+                        : especialidadeSelecionada === "farmacia"
+                          ? "Farmácia"
+                          : "Bioquímica"}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
@@ -109,7 +125,8 @@ export default function Home() {
               {especialidadeSelecionada === "psicologia" && <FormularioPsicologia />}
               {especialidadeSelecionada === "educacao-fisica" && <FormularioEducacaoFisica />}
               {especialidadeSelecionada === "nutricao" && <FormularioNutricao />}
-              {especialidadeSelecionada === "enfermagem" && <FormularioEnfermagem />}
+              {especialidadeSelecionada === "farmacia" && <FormularioFarmacia />}
+              {especialidadeSelecionada === "bioquimica" && <FormularioBioquimica />}
             </CardContent>
           </Card>
         )}
