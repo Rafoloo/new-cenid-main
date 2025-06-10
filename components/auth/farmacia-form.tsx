@@ -1544,7 +1544,7 @@ export default function FormularioAvaliacaoFarmacia() {
             {/* Adesão ao tratamento da terapia com insulina */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-teal-700 mb-4">
-                Adesão ao tratamento da terapia com insulina adaptado de Morisky
+                Adesão ao tratamento da terapia com insulina.
               </h3>
               <Table>
                 <TableHeader>
@@ -2007,7 +2007,7 @@ export default function FormularioAvaliacaoFarmacia() {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-4/5">Perguntas</TableHead>o
+                          <TableHead className="w-4/5">Perguntas</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
